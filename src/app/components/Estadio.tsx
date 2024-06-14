@@ -73,27 +73,15 @@ const Estadio: React.FC = () => {
     scene.add(centerCircleEdges);
 
     // Crear las gradas
-    const standGeometry = new THREE.BoxGeometry(130, 10, 10);
-    const standMaterial = new THREE.MeshBasicMaterial({ color: 0xa9a9a9 });
+    const geometry = new THREE.RingGeometry(150, 80, 15, 40);
+    geometry.rotateX(80.1);
 
-    // Crea las formas y los materializa con mesh
-    const stand1 = new THREE.Mesh(standGeometry, standMaterial);
-    stand1.position.set(0, 5, -45);
-    scene.add(stand1);
-
-    const stand2 = new THREE.Mesh(standGeometry, standMaterial);
-    stand2.position.set(0, 5, 45);
-    scene.add(stand2);
-
-    const stand3 = new THREE.Mesh(standGeometry, standMaterial);
-    stand3.rotation.y = Math.PI / 2;
-    stand3.position.set(-65, 5, 0);
-    scene.add(stand3);
-
-    const stand4 = new THREE.Mesh(standGeometry, standMaterial);
-    stand4.rotation.y = Math.PI / 2;
-    stand4.position.set(65, 5, 0);
-    scene.add(stand4);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xa9a9a9,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
 
     // Raycaster y vector para detectar clics
     // Raycaster permite detectar 'rayos' que atraviesan la escena de THREE
