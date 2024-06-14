@@ -44,32 +44,33 @@ const Estadio: React.FC = () => {
     const lines = [];
 
     // Líneas exteriores
-    lines.push(new THREE.Vector3(-60, 0, -40));
-    lines.push(new THREE.Vector3(60, 0, -40));
-    lines.push(new THREE.Vector3(60, 0, 40));
-    lines.push(new THREE.Vector3(-60, 0, 40));
-    lines.push(new THREE.Vector3(-60, 0, -40));
-
-    // Línea media
-    lines.push(new THREE.Vector3(0, 0, -40));
-    lines.push(new THREE.Vector3(0, 0, 40));
+    lines.push(new THREE.Vector3(-55, 1, -35));
+    lines.push(new THREE.Vector3(55, 1, -35));
+    lines.push(new THREE.Vector3(55, 1, 35));
+    lines.push(new THREE.Vector3(-55, 1, 35));
+    lines.push(new THREE.Vector3(-55, 1, -35));
 
     // Crear y añadir las líneas al campo
     const fieldLineGeometry = new THREE.BufferGeometry().setFromPoints(lines);
+
     const fieldLine = new THREE.Line(fieldLineGeometry, lineMaterial);
     scene.add(fieldLine);
+
+    // Línea media
+    const lines2 = [];
+    lines2.push(new THREE.Vector3(0, 1, -35));
+    lines2.push(new THREE.Vector3(0, 1, 35));
+    const fieldLineGeometry2 = new THREE.BufferGeometry().setFromPoints(lines2);
+    const fieldLine2 = new THREE.Line(fieldLineGeometry2, lineMaterial);
+    scene.add(fieldLine2);
+
     // Círculo central
     const centerCircleGeometry = new THREE.CircleGeometry(10, 32);
-    const centerCircleMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      side: THREE.DoubleSide,
-    });
-    const centerCircle = new THREE.Mesh(
-      centerCircleGeometry,
-      centerCircleMaterial
-    );
-    centerCircle.rotation.x = Math.PI / 2;
-    scene.add(centerCircle);
+    const edges = new THREE.EdgesGeometry(centerCircleGeometry);
+    const centerCircleEdges = new THREE.LineSegments(edges, lineMaterial);
+    centerCircleEdges.rotation.x = Math.PI / 2;
+    centerCircleEdges.translateZ(-1);
+    scene.add(centerCircleEdges);
 
     // Crear las gradas
     const standGeometry = new THREE.BoxGeometry(130, 10, 10);
