@@ -63,41 +63,47 @@ function EstadioQGIS() {
   const [hoveredFeature, setHoveredFeature] = React.useState<string | null>(
     null
   );
-  const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
-    null
-  );
+  //estado de secciones seleccionadas
+  const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
   const mapRef = React.useRef<any>(null);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
-      const { features } = event;
+      const { features, lngLat } = event;
       const hoveredFeatureId = features && features[0]?.properties?.id;
 
       if (hoveredFeatureId == hoveredFeature) {
         return;
       }
-      if (selectedFeature && hoveredFeatureId === selectedFeature) {
-        setHoveredFeature(null);
-      } else {
-        setHoveredFeature(hoveredFeatureId || null);
+
+      if (!selectedFeatures.includes(hoveredFeatureId || "")) {
+        const newData: HoverData = {
+          lat: lngLat.lat.toFixed(4),
+          lng: lngLat.lng.toFixed(4),
+          sector: features![0]?.properties?.nombre || "Ninguno",
+          zoom: "",
+        };
+        setHoveredData(newData);
       }
 
-      const { lngLat } = event;
-      const newData: HoverData = {
-        ...hoveredData,
-        lat: lngLat.lat.toFixed(4),
-        lng: lngLat.lng.toFixed(4),
-        sector: features![0]?.properties?.nombre || "Ninguno",
-      };
-      setHoveredData(newData);
+      setHoveredFeature(hoveredFeatureId || null);
     },
-    [hoveredData, selectedFeature]
+    [selectedFeatures]
   );
 
   const onClick = React.useCallback((event: MapLayerMouseEvent) => {
     const { features, lngLat } = event;
     const clickedFeatureId = features && features[0]?.properties?.id;
-    setSelectedFeature(clickedFeatureId || null);
+
+    setSelectedFeatures((prevSelected) => {
+      if (prevSelected.includes(clickedFeatureId || "")) {
+        // Deseleccionar al remover del array de sectores seleccionados
+        return prevSelected.filter((id) => id !== clickedFeatureId);
+      } else {
+        // Seleccionar, se agrega al array de seleccionados
+        return [...prevSelected, clickedFeatureId || ""];
+      }
+    });
 
     if (clickedFeatureId) {
       mapRef.current?.flyTo({
@@ -108,10 +114,6 @@ function EstadioQGIS() {
   }, []);
 
   const getLayerStyles = React.useMemo(() => {
-    if (!hoveredFeature && !selectedFeature) {
-      return layerStyle;
-    }
-
     const updatedLayerStyle: FillLayer = {
       ...layerStyle,
       paint: {
@@ -119,9 +121,9 @@ function EstadioQGIS() {
         "fill-color": [
           "case",
           ["==", ["get", "id"], hoveredFeature],
-          "#3288bd", // hover
-          ["==", ["get", "id"], selectedFeature],
-          "#000", // click
+          "#3288bd", // hover color
+          ["in", ["get", "id"], ["literal", selectedFeatures]],
+          "#000", // selected color
           [
             "interpolate",
             ["linear"],
@@ -183,7 +185,7 @@ function EstadioQGIS() {
       },
     };
     return updatedLayerStyle;
-  }, [hoveredFeature, selectedFeature]);
+  }, [hoveredFeature, selectedFeatures]);
 
   React.useEffect(() => {
     fetch("./estadioJSON.geojson")
