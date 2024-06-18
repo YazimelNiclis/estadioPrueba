@@ -71,6 +71,10 @@ function EstadioQGIS() {
       const { features, lngLat } = event;
       const hoveredFeatureId = features && features[0]?.properties?.id;
 
+      if (hoveredFeatureId == hoveredFeature) {
+        return;
+      }
+
       if (!selectedFeatures.includes(hoveredFeatureId || "")) {
         const newData: HoverData = {
           lat: lngLat.lat.toFixed(4),
