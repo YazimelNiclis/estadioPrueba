@@ -13,15 +13,32 @@ const layerStyle: FillLayer = {
     "fill-color": {
       property: "id",
       stops: [
-        [0, "#3288bd"],
-        [1, "#66c2a5"],
-        [2, "#abdda4"],
-        [3, "#e6f598"],
-        [4, "#ffffbf"],
-        [5, "#fee08b"],
-        [6, "#fdae61"],
-        [7, "#f46d43"],
-        [8, "#d53e4f"],
+        [0, "#00ff00"],
+        [1, "#19ff00"],
+        [2, "#32ff00"],
+        [3, "#4bff00"],
+        [4, "#64ff00"],
+        [5, "#7dff00"],
+        [6, "#96ff00"],
+        [7, "#afff00"],
+        [8, "#c8ff00"],
+        [9, "#e1ff00"],
+        [10, "#faff00"],
+        [11, "#f9e600"],
+        [12, "#f9cc00"],
+        [13, "#f9b300"],
+        [14, "#f99900"],
+        [15, "#f98000"],
+        [16, "#f96600"],
+        [17, "#f94d00"],
+        [18, "#f93300"],
+        [19, "#f91a00"],
+        [20, "#f90000"],
+        [21, "#e60000"],
+        [22, "#cc0000"],
+        [23, "#b30000"],
+        [24, "#990000"],
+        [25, "#800000"],
       ],
     },
     "fill-opacity": 0.5,
@@ -40,7 +57,7 @@ function EstadioQGIS() {
   const [hoveredData, setHoveredData] = React.useState<HoverData>({
     lat: "",
     lng: "",
-    sector: "",
+    sector: "Ninguno",
     zoom: "",
   });
 
@@ -55,13 +72,18 @@ function EstadioQGIS() {
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
       const hoveredFeature = features && features[0];
-      const newData: HoverData = {
-        ...hoveredData,
-        lat: lngLat.lat.toFixed(4),
-        lng: lngLat.lng.toFixed(4),
-        sector: hoveredFeature?.properties?.nombre || "Ninguno",
-      };
-      setHoveredData(newData);
+      if (
+        hoveredFeature?.properties?.nombre &&
+        hoveredFeature?.properties?.nombre !== hoveredData.sector
+      ) {
+        const newData: HoverData = {
+          ...hoveredData,
+          lat: lngLat.lat.toFixed(4),
+          lng: lngLat.lng.toFixed(4),
+          sector: hoveredFeature?.properties?.nombre,
+        };
+        setHoveredData(newData);
+      }
     },
     [hoveredData]
   );
