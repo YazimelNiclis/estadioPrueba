@@ -13,15 +13,32 @@ const layerStyle: FillLayer = {
     "fill-color": {
       property: "id",
       stops: [
-        [0, "#3288bd"],
-        [1, "#66c2a5"],
-        [2, "#abdda4"],
-        [3, "#e6f598"],
-        [4, "#ffffbf"],
-        [5, "#fee08b"],
-        [6, "#fdae61"],
-        [7, "#f46d43"],
-        [8, "#d53e4f"],
+        [0, "#00ff00"],
+        [1, "#19ff00"],
+        [2, "#32ff00"],
+        [3, "#4bff00"],
+        [4, "#64ff00"],
+        [5, "#7dff00"],
+        [6, "#96ff00"],
+        [7, "#afff00"],
+        [8, "#c8ff00"],
+        [9, "#e1ff00"],
+        [10, "#faff00"],
+        [11, "#f9e600"],
+        [12, "#f9cc00"],
+        [13, "#f9b300"],
+        [14, "#f99900"],
+        [15, "#f98000"],
+        [16, "#f96600"],
+        [17, "#f94d00"],
+        [18, "#f93300"],
+        [19, "#f91a00"],
+        [20, "#f90000"],
+        [21, "#e60000"],
+        [22, "#cc0000"],
+        [23, "#b30000"],
+        [24, "#990000"],
+        [25, "#800000"],
       ],
     },
     "fill-opacity": 0.5,
@@ -40,7 +57,7 @@ function EstadioQGIS() {
   const [hoveredData, setHoveredData] = React.useState<HoverData>({
     lat: "",
     lng: "",
-    sector: "",
+    sector: "Ninguno",
     zoom: "",
   });
   const [hoveredFeature, setHoveredFeature] = React.useState<string | null>(
@@ -66,7 +83,7 @@ function EstadioQGIS() {
         ...hoveredData,
         lat: lngLat.lat.toFixed(4),
         lng: lngLat.lng.toFixed(4),
-        sector: features[0]?.properties?.nombre || "Ninguno",
+        sector: features![0]?.properties?.nombre || "Ninguno",
       };
       setHoveredData(newData);
     },
@@ -99,23 +116,57 @@ function EstadioQGIS() {
             ["linear"],
             ["get", "id"],
             0,
-            "#3288bd",
+            "#00ff00",
             1,
-            "#66c2a5",
+            "#19ff00",
             2,
-            "#abdda4",
+            "#32ff00",
             3,
-            "#e6f598",
+            "#4bff00",
             4,
-            "#ffffbf",
+            "#64ff00",
             5,
-            "#fee08b",
+            "#7dff00",
             6,
-            "#fdae61",
+            "#96ff00",
             7,
-            "#f46d43",
+            "#afff00",
             8,
-            "#d53e4f",
+            "#c8ff00",
+            9,
+            "#e1ff00",
+            10,
+            "#faff00",
+            11,
+            "#f9e600",
+            12,
+            "#f9cc00",
+            13,
+            "#f9b300",
+            14,
+            "#f99900",
+            15,
+            "#f98000",
+            16,
+            "#f96600",
+            17,
+            "#f94d00",
+            18,
+            "#f93300",
+            19,
+            "#f91a00",
+            20,
+            "#f90000",
+            21,
+            "#e60000",
+            22,
+            "#cc0000",
+            23,
+            "#b30000",
+            24,
+            "#990000",
+            25,
+            "#800000",
           ],
         ],
       },
@@ -129,6 +180,26 @@ function EstadioQGIS() {
       .then((json) => setAllData(json))
       .catch((err) => console.error("Could not load data", err));
   }, []);
+
+  // const onHover = React.useCallback(
+  //   (event: MapLayerMouseEvent) => {
+  //     const { features, lngLat } = event;
+  //     const hoveredFeature = features && features[0];
+  //     if (
+  //       hoveredFeature?.properties?.nombre &&
+  //       hoveredFeature?.properties?.nombre !== hoveredData.sector
+  //     ) {
+  //       const newData: HoverData = {
+  //         ...hoveredData,
+  //         lat: lngLat.lat.toFixed(4),
+  //         lng: lngLat.lng.toFixed(4),
+  //         sector: hoveredFeature?.properties?.nombre,
+  //       };
+  //       setHoveredData(newData);
+  //     }
+  //   },
+  //   [hoveredData]
+  // );
 
   return (
     <>
@@ -145,6 +216,12 @@ function EstadioQGIS() {
             longitude: -57.6573,
             zoom: 17.6,
           }}
+          onZoom={(e) =>
+            setHoveredData((prev) => ({
+              ...prev,
+              zoom: e.viewState.zoom.toFixed(4),
+            }))
+          }
           mapboxAccessToken={MAPTOKEN}
           interactiveLayerIds={["data"]}
           onMouseMove={onHover}
