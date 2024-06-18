@@ -2,14 +2,16 @@
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
 import type { FillLayer } from "react-map-gl";
-import { updatePercentiles } from "../utils/utils";
+
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+//mapStyle="mapbox://styles/mapbox/streets-v9"
+
 const layerStyle: FillLayer = {
   id: "data",
   type: "fill",
   paint: {
     "fill-color": {
-      property: "percentile",
+      property: "id",
       stops: [
         [0, "#3288bd"],
         [1, "#66c2a5"],
@@ -22,12 +24,23 @@ const layerStyle: FillLayer = {
         [8, "#d53e4f"],
       ],
     },
-    "fill-opacity": 0.3,
+    "fill-opacity": 0.5,
+  },
+};
+
+const highlightLayerStyle: FillLayer = {
+  id: "highlighted-data",
+  type: "fill",
+  paint: {
+    "fill-color": "#f00",
+    "fill-opacity": 0.7,
   },
 };
 
 function EstadioQGIS() {
   const [allData, setAllData] = React.useState<any>();
+  const [layerStyles, setLayerStyles] = React.useState<FillLayer>(layerStyle);
+
   React.useEffect(() => {
     fetch("./estadioJSON.geojson")
       .then((resp) => resp.json())
@@ -35,16 +48,31 @@ function EstadioQGIS() {
       .catch((err) => console.error("Could not load data", err));
   }, []);
 
-  const onHover = React.useCallback(
-    (event: { features: any; point: { x: any; y: any } }) => {
-      const {
-        features,
-        point: { x, y },
-      } = event;
-      const hoveredFeature = features && features[0];
-    },
-    []
-  );
+  const onHover = React.useCallback((event: any) => {
+    const {
+      features,
+      point: { x, y },
+    } = event;
+    const hoveredFeature = features && features[0];
+
+    if (hoveredFeature) {
+      setLayerStyles((prevStyle) => ({
+        ...prevStyle,
+        paint: {
+          ...prevStyle.paint,
+          "fill-opacity": 0.7,
+        },
+      }));
+    } else {
+      setLayerStyles((prevStyle) => ({
+        ...prevStyle,
+        paint: {
+          ...prevStyle.paint,
+          "fill-opacity": 0.3,
+        },
+      }));
+    }
+  }, []);
 
   return (
     <>
@@ -57,10 +85,10 @@ function EstadioQGIS() {
           }}
           mapboxAccessToken={MAPTOKEN}
           interactiveLayerIds={["data"]}
-          onMouseMove={() => onHover}
+          onMouseMove={onHover}
         >
           <Source id="data" type="geojson" data={allData}>
-            <Layer {...layerStyle} />
+            <Layer {...layerStyles} />
           </Source>
         </Map>
       )}
