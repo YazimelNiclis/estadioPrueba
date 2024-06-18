@@ -50,7 +50,7 @@ const layerStyle: FillLayer = {
 interface HoverData {
   lng: string;
   lat: string;
-  zoom: string;
+  zoom?: string;
   sector: string;
 }
 
@@ -83,9 +83,8 @@ function EstadioQGIS() {
           lat: lngLat.lat.toFixed(4),
           lng: lngLat.lng.toFixed(4),
           sector: features![0]?.properties?.nombre || "Ninguno",
-          zoom: "",
         };
-        setHoveredData(newData);
+        setHoveredData((prev) => ({ ...prev, ...newData }));
       }
 
       setHoveredFeature(hoveredFeatureId || null);
@@ -236,6 +235,8 @@ function EstadioQGIS() {
       {allData && (
         <Map
           ref={mapRef}
+          minZoom={18}
+          maxZoom={20.5}
           initialViewState={{
             latitude: centralPoint.lat,
             longitude: centralPoint.lng,
