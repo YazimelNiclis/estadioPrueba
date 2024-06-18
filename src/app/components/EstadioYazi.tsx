@@ -51,9 +51,19 @@ interface HoverData {
   zoom: string;
   sector: string;
 }
+interface SelectedData {
+  codigo: number;
+  desc: string;
+  id: number;
+  nombre: string;
+  place_id: number;
+}
 
 function EstadioYazi() {
   const [allData, setAllData] = React.useState<any>();
+  const [selectedData, setSelectedData] = React.useState<
+    SelectedData | undefined
+  >(undefined);
   const [hoveredData, setHoveredData] = React.useState<HoverData>({
     lat: "",
     lng: "",
@@ -97,6 +107,12 @@ function EstadioYazi() {
     const { features } = event;
     const clickedFeatureId = features && features[0]?.properties?.id;
     setSelectedFeature(clickedFeatureId || null);
+    if (features?.length) {
+      const feature = features[0]?.properties as SelectedData;
+      setSelectedData(feature);
+    } else {
+      setSelectedData(undefined);
+    }
   }, []);
 
   const getLayerStyles = React.useMemo(() => {
@@ -204,37 +220,56 @@ function EstadioYazi() {
   //   [hoveredData]
   // );
 
-  console.log("render");
+  const bounds: [number, number, number, number] = [
+    -57.659, -25.2935, -57.6557, -25.2907,
+  ];
+
   return (
     <>
       {hoveredData && (
-        <div className="bg-slate-700 text-white p-4 z-[1] absolute top-0 left-0 m-4 rounded-md">
-          Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:{" "}
-          {hoveredData.zoom} | Sector: {hoveredData.sector}
+        <div className="bg-slate-500 text-white max-w-[40vw] max-h-[45vw] w-full h-full p-4 z-[1] absolute top-0 right-0 m-4 rounded-md">
+          <p>
+            Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:
+            {hoveredData.zoom} | Sector: {hoveredData.sector}
+          </p>
+          <br />
+          {selectedData && (
+            <>
+              <p className="text-xl">Datos seleccionados:</p>
+              <p>Codigo: {selectedData?.codigo}</p>
+              <p>Descripcion: {selectedData?.desc}</p>
+              <p>Id: {selectedData?.id}</p>
+              <p>Nombre: {selectedData?.nombre}</p>
+              <p>Place id: {selectedData?.place_id}</p>
+            </>
+          )}
         </div>
       )}
       {allData && (
-        <Map
-          initialViewState={{
-            latitude: -25.2921546,
-            longitude: -57.6573,
-            zoom: 17.6,
-          }}
-          onZoom={(e) =>
-            setHoveredData((prev) => ({
-              ...prev,
-              zoom: e.viewState.zoom.toFixed(4),
-            }))
-          }
-          mapboxAccessToken={MAPTOKEN}
-          interactiveLayerIds={["data"]}
-          onMouseMove={onHover}
-          onClick={onClick}
-        >
-          <Source id="data" type="geojson" data={allData}>
-            <Layer {...getLayerStyles} />
-          </Source>
-        </Map>
+        <div className="max-w-[50vw] absolute w-full h-full left-0 top-0 bottom-0">
+          <Map
+            initialViewState={{
+              latitude: -25.2921546,
+              longitude: -57.6573,
+              zoom: 17.6,
+            }}
+            onZoom={(e) =>
+              setHoveredData((prev) => ({
+                ...prev,
+                zoom: e.viewState.zoom.toFixed(4),
+              }))
+            }
+            maxBounds={bounds}
+            mapboxAccessToken={MAPTOKEN}
+            interactiveLayerIds={["data"]}
+            onMouseMove={onHover}
+            onClick={onClick}
+          >
+            <Source id="data" type="geojson" data={allData}>
+              <Layer {...getLayerStyles} />
+            </Source>
+          </Map>
+        </div>
       )}
     </>
   );
