@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer, MapLayerMouseEvent } from "react-map-gl";
+import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
+import { LngLatBounds } from "mapbox-gl";
+import { calculateAngle } from "../utils/utils";
 
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -44,6 +46,15 @@ const layerStyle: FillLayer = {
     "fill-opacity": 0.5,
   },
 };
+const centralPoint = { lat: -25.2921546, lng: -57.6573 };
+const mapBounds = new LngLatBounds(
+  [-57.6595, -25.2931], // inf. izq
+  [-57.655, -25.2912] // sup. der
+);
+
+const bounds: [number, number, number, number] = [
+  -57.659, -25.2935, -57.6557, -25.2907,
+];
 
 interface HoverData {
   lng: string;
@@ -73,10 +84,15 @@ function EstadioYazi() {
   const [hoveredFeature, setHoveredFeature] = React.useState<string | null>(
     null
   );
+  const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
   const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
     null
   );
-
+  const [initialView, setInitialView] = React.useState<any>(null);
+  const [lastClickedFeature, setLastClickedFeature] = React.useState<
+    string | null
+  >();
+  const mapRef = React.useRef<MapRef>(null);
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features } = event;
@@ -103,17 +119,74 @@ function EstadioYazi() {
     [hoveredData, selectedFeature]
   );
 
-  const onClick = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features } = event;
-    const clickedFeatureId = features && features[0]?.properties?.id;
-    setSelectedFeature(clickedFeatureId || null);
-    if (features?.length) {
-      const feature = features[0]?.properties as SelectedData;
-      setSelectedData(feature);
-    } else {
-      setSelectedData(undefined);
+  const handleZoomAndPitchReset = () => {
+    mapRef.current?.setPitch(0);
+    mapRef.current?.fitBounds(mapBounds, {
+      padding: 20,
+      linear: true,
+    });
+    setLastClickedFeature(null);
+  };
+
+  const handleFeatureSelection = (clickedFeatureId: string | null) => {
+    setSelectedFeatures((prevSelected) => {
+      if (prevSelected.includes(clickedFeatureId || "")) {
+        if (clickedFeatureId === lastClickedFeature) {
+          handleZoomAndPitchReset();
+        }
+        return prevSelected.filter((id) => id !== clickedFeatureId);
+      } else {
+        setLastClickedFeature(clickedFeatureId);
+        return [...prevSelected, clickedFeatureId || ""];
+      }
+      return prevSelected;
+    });
+  };
+
+  const handleMapRotation = (
+    lngLat: mapboxgl.LngLat,
+    clickedFeatureId: string | null
+  ) => {
+    if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
+      const angle = calculateAngle(lngLat, centralPoint);
+      mapRef.current?.rotateTo(angle, {
+        duration: 1000,
+        center: [lngLat.lng, lngLat.lat],
+        zoom: 19.5,
+        pitch: 50,
+      });
     }
-  }, []);
+  };
+
+  const resetMap = () => {
+    if (initialView) {
+      mapRef.current?.easeTo({
+        duration: 1000,
+        center: initialView.center,
+        zoom: initialView.zoom,
+        pitch: initialView.pitch,
+        bearing: initialView.bearing,
+      });
+    }
+  };
+
+  const onClick = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features, lngLat } = event;
+      const clickedFeatureId = features && features[0]?.properties?.id;
+      setSelectedFeature(clickedFeatureId || null);
+      if (features?.length) {
+        const feature = features[0]?.properties as SelectedData;
+        handleFeatureSelection(clickedFeatureId);
+        handleMapRotation(lngLat, clickedFeatureId);
+        setSelectedData(feature);
+      } else {
+        resetMap();
+        setSelectedData(undefined);
+      }
+    },
+    [lastClickedFeature]
+  );
 
   const getLayerStyles = React.useMemo(() => {
     if (!hoveredFeature && !selectedFeature) {
@@ -198,7 +271,30 @@ function EstadioYazi() {
       .then((resp) => resp.json())
       .then((json) => setAllData(json))
       .catch((err) => console.error("Could not load data", err));
+    //cargo los valores iniciales del mapa
+    if (mapRef.current) {
+      const map = mapRef.current.getMap();
+      setInitialView({
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+      });
+    }
   }, []);
+
+  React.useEffect(() => {
+    //cargo los valores iniciales del mapa
+    if (mapRef.current) {
+      const map = mapRef.current.getMap();
+      setInitialView({
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+      });
+    }
+  }, [allData]);
 
   // const onHover = React.useCallback(
   //   (event: MapLayerMouseEvent) => {
@@ -219,11 +315,7 @@ function EstadioYazi() {
   //   },
   //   [hoveredData]
   // );
-
-  const bounds: [number, number, number, number] = [
-    -57.659, -25.2935, -57.6557, -25.2907,
-  ];
-
+  console.log("hola");
   return (
     <>
       {hoveredData && (
@@ -248,9 +340,12 @@ function EstadioYazi() {
       {allData && (
         <div className="max-w-[50vw] absolute w-full h-full left-0 top-0 bottom-0">
           <Map
+            ref={mapRef}
+            minZoom={17}
+            maxZoom={20.5}
             initialViewState={{
-              latitude: -25.2921546,
-              longitude: -57.6573,
+              latitude: centralPoint.lat,
+              longitude: centralPoint.lng,
               zoom: 17.6,
             }}
             onZoom={(e) =>
