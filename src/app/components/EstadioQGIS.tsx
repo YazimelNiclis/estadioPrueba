@@ -72,6 +72,9 @@ function EstadioQGIS() {
   );
   //estado de secciones seleccionadas
   const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
+  const [lastClickedFeature, setLastClickedFeature] = React.useState<
+    string | null
+  >();
   const mapRef = React.useRef<MapRef>(null);
 
   const onHover = React.useCallback(
@@ -97,36 +100,58 @@ function EstadioQGIS() {
     [selectedFeatures]
   );
 
-  const onClick = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features, lngLat } = event;
-    const clickedFeatureId = features && features[0]?.properties?.id;
+  const handleZoomAndPitchReset = () => {
+    mapRef.current?.setPitch(0);
+    mapRef.current?.fitBounds(mapBounds, {
+      padding: 20,
+      linear: true,
+    });
+    setLastClickedFeature(null);
+  };
 
+  const handleFeatureSelection = (clickedFeatureId: string | null) => {
     setSelectedFeatures((prevSelected) => {
       if (prevSelected.includes(clickedFeatureId || "")) {
-        // Deseleccionar al remover del array de sectores seleccionados
-        return prevSelected.filter((id) => id !== clickedFeatureId);
+        if (clickedFeatureId === lastClickedFeature) {
+          handleZoomAndPitchReset();
+        } else {
+          return prevSelected.filter((id) => id !== clickedFeatureId);
+        }
       } else {
-        // Seleccionar, se agrega al array de seleccionados
+        setLastClickedFeature(clickedFeatureId);
         return [...prevSelected, clickedFeatureId || ""];
       }
+      return prevSelected;
     });
+  };
 
-    if (clickedFeatureId) {
-      // mapRef.current?.flyTo({
-      //   center: [lngLat.lng, lngLat.lat],
-      //   zoom: 19.5,
-      //   pitch: 20,
-      //   curve: 3,
-      // });
+  const handleMapRotation = (
+    lngLat: mapboxgl.LngLat,
+    clickedFeatureId: string | null
+  ) => {
+    if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
       const angle = calculateAngle(lngLat, centralPoint);
-
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
         center: [lngLat.lng, lngLat.lat],
         zoom: 19.5,
+        pitch: 50,
       });
     }
-  }, []);
+  };
+
+  const onClick = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features, lngLat } = event;
+      const clickedFeatureId = features && features[0]?.properties?.id;
+
+      handleFeatureSelection(clickedFeatureId);
+      handleMapRotation(lngLat, clickedFeatureId);
+    },
+    [lastClickedFeature]
+  );
+  
+  
 
   const getLayerStyles = React.useMemo(() => {
     const updatedLayerStyle: FillLayer = {
