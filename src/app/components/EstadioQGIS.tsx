@@ -4,9 +4,14 @@ import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
 import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
 import { calculateAngle } from "../utils/utils";
+import { LngLatBounds } from "mapbox-gl";
 
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const centralPoint = { lat: -25.2921546, lng: -57.6573 };
+const mapBounds = new LngLatBounds(
+  [-57.6595, -25.2931], // inf. izq
+  [-57.655, -25.2912] // sup. der
+);
 
 const layerStyle: FillLayer = {
   id: "data",
@@ -78,14 +83,14 @@ function EstadioQGIS() {
         return;
       }
 
-      if (!selectedFeatures.includes(hoveredFeatureId || "")) {
-        const newData: HoverData = {
-          lat: lngLat.lat.toFixed(4),
-          lng: lngLat.lng.toFixed(4),
-          sector: features![0]?.properties?.nombre || "Ninguno",
-        };
-        setHoveredData((prev) => ({ ...prev, ...newData }));
-      }
+      // if (!selectedFeatures.includes(hoveredFeatureId || "")) {
+      const newData: HoverData = {
+        lat: lngLat.lat.toFixed(4),
+        lng: lngLat.lng.toFixed(4),
+        sector: features![0]?.properties?.nombre || "Ninguno",
+      };
+      setHoveredData((prev) => ({ ...prev, ...newData }));
+      // }
 
       setHoveredFeature(hoveredFeatureId || null);
     },
@@ -237,6 +242,7 @@ function EstadioQGIS() {
           ref={mapRef}
           minZoom={18}
           maxZoom={20.5}
+          maxBounds={mapBounds}
           initialViewState={{
             latitude: centralPoint.lat,
             longitude: centralPoint.lng,
