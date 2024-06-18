@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer } from "react-map-gl";
+import type { FillLayer, MapLayerMouseEvent } from "react-map-gl";
 
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 //mapStyle="mapbox://styles/mapbox/streets-v9"
@@ -28,18 +28,21 @@ const layerStyle: FillLayer = {
   },
 };
 
-const highlightLayerStyle: FillLayer = {
-  id: "highlighted-data",
-  type: "fill",
-  paint: {
-    "fill-color": "#f00",
-    "fill-opacity": 0.7,
-  },
-};
+interface HoverData {
+  lng: string;
+  lat: string;
+  zoom: string;
+  sector: string;
+}
 
 function EstadioQGIS() {
   const [allData, setAllData] = React.useState<any>();
-  const [layerStyles, setLayerStyles] = React.useState<FillLayer>(layerStyle);
+  const [hoveredData, setHoveredData] = React.useState<HoverData>({
+    lat: "",
+    lng: "",
+    sector: "",
+    zoom: "",
+  });
 
   React.useEffect(() => {
     fetch("./estadioJSON.geojson")
@@ -48,34 +51,29 @@ function EstadioQGIS() {
       .catch((err) => console.error("Could not load data", err));
   }, []);
 
-  const onHover = React.useCallback((event: any) => {
-    const {
-      features,
-      point: { x, y },
-    } = event;
-    const hoveredFeature = features && features[0];
-
-    if (hoveredFeature) {
-      setLayerStyles((prevStyle) => ({
-        ...prevStyle,
-        paint: {
-          ...prevStyle.paint,
-          "fill-opacity": 0.7,
-        },
-      }));
-    } else {
-      setLayerStyles((prevStyle) => ({
-        ...prevStyle,
-        paint: {
-          ...prevStyle.paint,
-          "fill-opacity": 0.3,
-        },
-      }));
-    }
-  }, []);
+  const onHover = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features, lngLat } = event;
+      const hoveredFeature = features && features[0];
+      const newData: HoverData = {
+        ...hoveredData,
+        lat: lngLat.lat.toFixed(4),
+        lng: lngLat.lng.toFixed(4),
+        sector: hoveredFeature?.properties?.nombre || "Ninguno",
+      };
+      setHoveredData(newData);
+    },
+    [hoveredData]
+  );
 
   return (
     <>
+      {hoveredData && (
+        <div className="bg-slate-700 text-white p-4 z-[1] absolute top-0 left-0 m-4 rounded-md">
+          Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:{" "}
+          {hoveredData.zoom} | Sector: {hoveredData.sector}
+        </div>
+      )}
       {allData && (
         <Map
           initialViewState={{
@@ -86,9 +84,15 @@ function EstadioQGIS() {
           mapboxAccessToken={MAPTOKEN}
           interactiveLayerIds={["data"]}
           onMouseMove={onHover}
+          onZoom={(e) =>
+            setHoveredData((prev) => ({
+              ...prev,
+              zoom: e.viewState.zoom.toFixed(4),
+            }))
+          }
         >
           <Source id="data" type="geojson" data={allData}>
-            <Layer {...layerStyles} />
+            <Layer {...layerStyle} />
           </Source>
         </Map>
       )}
