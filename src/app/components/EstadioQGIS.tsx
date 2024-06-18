@@ -114,9 +114,8 @@ function EstadioQGIS() {
       if (prevSelected.includes(clickedFeatureId || "")) {
         if (clickedFeatureId === lastClickedFeature) {
           handleZoomAndPitchReset();
-        } else {
-          return prevSelected.filter((id) => id !== clickedFeatureId);
         }
+        return prevSelected.filter((id) => id !== clickedFeatureId);
       } else {
         setLastClickedFeature(clickedFeatureId);
         return [...prevSelected, clickedFeatureId || ""];
