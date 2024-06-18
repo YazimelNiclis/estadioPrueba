@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer } from "react-map-gl";
+import type { FillLayer, MapLayerMouseEvent } from "react-map-gl";
 import { updatePercentiles } from "../utils/utils";
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const layerStyle: FillLayer = {
@@ -25,9 +25,22 @@ const layerStyle: FillLayer = {
     "fill-opacity": 0.3,
   },
 };
+interface HoverData {
+  lng: string;
+  lat: string;
+  zoom: string;
+  sector: string;
+}
 
 function EstadioQGIS() {
   const [allData, setAllData] = React.useState<any>();
+  const [hoveredData, setHoveredData] = React.useState<HoverData>({
+    lat: "",
+    lng: "",
+    sector: "",
+    zoom: "",
+  });
+
   React.useEffect(() => {
     fetch("./estadioJSON.geojson")
       .then((resp) => resp.json())
@@ -36,18 +49,28 @@ function EstadioQGIS() {
   }, []);
 
   const onHover = React.useCallback(
-    (event: { features: any; point: { x: any; y: any } }) => {
-      const {
-        features,
-        point: { x, y },
-      } = event;
+    (event: MapLayerMouseEvent) => {
+      const { features, lngLat } = event;
       const hoveredFeature = features && features[0];
+      const newData: HoverData = {
+        ...hoveredData,
+        lat: lngLat.lat.toFixed(4),
+        lng: lngLat.lng.toFixed(4),
+        sector: hoveredFeature?.properties?.nombre || "Ninguno",
+      };
+      setHoveredData(newData);
     },
-    []
+    [hoveredData]
   );
 
   return (
     <>
+      {hoveredData && (
+        <div className="bg-slate-700 text-white p-4 z-[1] absolute top-0 left-0 m-4 rounded-md">
+          Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:{" "}
+          {hoveredData.zoom} | Sector: {hoveredData.sector}
+        </div>
+      )}
       {allData && (
         <Map
           initialViewState={{
@@ -57,7 +80,13 @@ function EstadioQGIS() {
           }}
           mapboxAccessToken={MAPTOKEN}
           interactiveLayerIds={["data"]}
-          onMouseMove={() => onHover}
+          onMouseMove={onHover}
+          onZoom={(e) =>
+            setHoveredData((prev) => ({
+              ...prev,
+              zoom: e.viewState.zoom.toFixed(4),
+            }))
+          }
         >
           <Source id="data" type="geojson" data={allData}>
             <Layer {...layerStyle} />
