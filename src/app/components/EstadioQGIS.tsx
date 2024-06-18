@@ -2,9 +2,16 @@
 
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer, MapLayerMouseEvent } from "react-map-gl";
+import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
+import { calculateAngle } from "../utils/utils";
+import { LngLatBounds } from "mapbox-gl";
 
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const centralPoint = { lat: -25.2921546, lng: -57.6573 };
+const mapBounds = new LngLatBounds(
+  [-57.6595, -25.2931], // inf. izq
+  [-57.655, -25.2912] // sup. der
+);
 
 const layerStyle: FillLayer = {
   id: "data",
@@ -48,7 +55,7 @@ const layerStyle: FillLayer = {
 interface HoverData {
   lng: string;
   lat: string;
-  zoom: string;
+  zoom?: string;
   sector: string;
 }
 
@@ -65,6 +72,10 @@ function EstadioQGIS() {
   );
   //estado de secciones seleccionadas
   const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
+  const [lastClickedFeature, setLastClickedFeature] = React.useState<
+    string | null
+  >();
+  const mapRef = React.useRef<MapRef>(null);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
@@ -75,35 +86,71 @@ function EstadioQGIS() {
         return;
       }
 
-      if (!selectedFeatures.includes(hoveredFeatureId || "")) {
-        const newData: HoverData = {
-          lat: lngLat.lat.toFixed(4),
-          lng: lngLat.lng.toFixed(4),
-          sector: features![0]?.properties?.nombre || "Ninguno",
-          zoom: "",
-        };
-        setHoveredData(newData);
-      }
+      // if (!selectedFeatures.includes(hoveredFeatureId || "")) {
+      const newData: HoverData = {
+        lat: lngLat.lat.toFixed(4),
+        lng: lngLat.lng.toFixed(4),
+        sector: features![0]?.properties?.nombre || "Ninguno",
+      };
+      setHoveredData((prev) => ({ ...prev, ...newData }));
+      // }
 
       setHoveredFeature(hoveredFeatureId || null);
     },
     [selectedFeatures]
   );
 
-  const onClick = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features } = event;
-    const clickedFeatureId = features && features[0]?.properties?.id;
+  const handleZoomAndPitchReset = () => {
+    mapRef.current?.setPitch(0);
+    mapRef.current?.fitBounds(mapBounds, {
+      padding: 20,
+      linear: true,
+    });
+    setLastClickedFeature(null);
+  };
 
+  const handleFeatureSelection = (clickedFeatureId: string | null) => {
     setSelectedFeatures((prevSelected) => {
       if (prevSelected.includes(clickedFeatureId || "")) {
-        // Deseleccionar al remover del array de sectores seleccionados
+        if (clickedFeatureId === lastClickedFeature) {
+          handleZoomAndPitchReset();
+        }
         return prevSelected.filter((id) => id !== clickedFeatureId);
       } else {
-        // Seleccionar, se agrega al array de seleccionados
+        setLastClickedFeature(clickedFeatureId);
         return [...prevSelected, clickedFeatureId || ""];
       }
+      return prevSelected;
     });
-  }, []);
+  };
+
+  const handleMapRotation = (
+    lngLat: mapboxgl.LngLat,
+    clickedFeatureId: string | null
+  ) => {
+    if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
+      const angle = calculateAngle(lngLat, centralPoint);
+      mapRef.current?.rotateTo(angle, {
+        duration: 1000,
+        center: [lngLat.lng, lngLat.lat],
+        zoom: 19.5,
+        pitch: 50,
+      });
+    }
+  };
+
+  const onClick = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features, lngLat } = event;
+      const clickedFeatureId = features && features[0]?.properties?.id;
+
+      handleFeatureSelection(clickedFeatureId);
+      handleMapRotation(lngLat, clickedFeatureId);
+    },
+    [lastClickedFeature]
+  );
+  
+  
 
   const getLayerStyles = React.useMemo(() => {
     const updatedLayerStyle: FillLayer = {
@@ -206,7 +253,6 @@ function EstadioQGIS() {
   //   [hoveredData]
   // );
 
-  console.log("render");
   return (
     <>
       {hoveredData && (
@@ -217,9 +263,13 @@ function EstadioQGIS() {
       )}
       {allData && (
         <Map
+          ref={mapRef}
+          minZoom={18}
+          maxZoom={20.5}
+          maxBounds={mapBounds}
           initialViewState={{
-            latitude: -25.2921546,
-            longitude: -57.6573,
+            latitude: centralPoint.lat,
+            longitude: centralPoint.lng,
             zoom: 17.6,
           }}
           onZoom={(e) =>
