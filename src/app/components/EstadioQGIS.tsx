@@ -72,6 +72,9 @@ function EstadioQGIS() {
       const { features } = event;
       const hoveredFeatureId = features && features[0]?.properties?.id;
 
+      if (hoveredFeatureId == hoveredFeature) {
+        return;
+      }
       if (selectedFeature && hoveredFeatureId === selectedFeature) {
         setHoveredFeature(null);
       } else {
@@ -201,6 +204,7 @@ function EstadioQGIS() {
   //   [hoveredData]
   // );
 
+  console.log("render");
   return (
     <>
       {hoveredData && (
