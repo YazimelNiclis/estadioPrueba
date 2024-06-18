@@ -1,3 +1,4 @@
+//Este permite seleccionar varios sectores a la vez pero no tiene el efecto de zoom
 "use client";
 
 import * as React from "react";
@@ -52,7 +53,7 @@ interface HoverData {
   sector: string;
 }
 
-function EstadioQGIS() {
+function EstadioQGISAlt() {
   const [allData, setAllData] = React.useState<any>();
   const [hoveredData, setHoveredData] = React.useState<HoverData>({
     lat: "",
@@ -63,21 +64,19 @@ function EstadioQGIS() {
   const [hoveredFeature, setHoveredFeature] = React.useState<string | null>(
     null
   );
-  //estado de seccion seleccionada
-  const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
-    null
-  );
+  //estado de secciones seleccionadas
+  const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
       const hoveredFeatureId = features && features[0]?.properties?.id;
 
-      if (hoveredFeatureId === hoveredFeature) {
+      if (hoveredFeatureId == hoveredFeature) {
         return;
       }
 
-      if (hoveredFeatureId !== selectedFeature) {
+      if (!selectedFeatures.includes(hoveredFeatureId || "")) {
         const newData: HoverData = {
           lat: lngLat.lat.toFixed(4),
           lng: lngLat.lng.toFixed(4),
@@ -89,14 +88,22 @@ function EstadioQGIS() {
 
       setHoveredFeature(hoveredFeatureId || null);
     },
-    [selectedFeature, hoveredFeature]
+    [selectedFeatures]
   );
 
   const onClick = React.useCallback((event: MapLayerMouseEvent) => {
     const { features } = event;
     const clickedFeatureId = features && features[0]?.properties?.id;
 
-    setSelectedFeature(clickedFeatureId || null);
+    setSelectedFeatures((prevSelected) => {
+      if (prevSelected.includes(clickedFeatureId || "")) {
+        // Deseleccionar al remover del array de sectores seleccionados
+        return prevSelected.filter((id) => id !== clickedFeatureId);
+      } else {
+        // Seleccionar, se agrega al array de seleccionados
+        return [...prevSelected, clickedFeatureId || ""];
+      }
+    });
   }, []);
 
   const getLayerStyles = React.useMemo(() => {
@@ -108,7 +115,7 @@ function EstadioQGIS() {
           "case",
           ["==", ["get", "id"], hoveredFeature],
           "#3288bd", // hover color
-          ["==", ["get", "id"], selectedFeature],
+          ["in", ["get", "id"], ["literal", selectedFeatures]],
           "#000", // selected color
           [
             "interpolate",
@@ -171,7 +178,7 @@ function EstadioQGIS() {
       },
     };
     return updatedLayerStyle;
-  }, [hoveredFeature, selectedFeature]);
+  }, [hoveredFeature, selectedFeatures]);
 
   React.useEffect(() => {
     fetch("./estadioJSON.geojson")
@@ -236,4 +243,4 @@ function EstadioQGIS() {
   );
 }
 
-export default EstadioQGIS;
+export default EstadioQGISAlt;
