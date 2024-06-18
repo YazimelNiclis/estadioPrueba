@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer, MapLayerMouseEvent } from "react-map-gl";
+import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
+import { calculateAngle } from "../utils/utils";
 
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const centralPoint = { lat: -25.2921546, lng: -57.6573 };
 
 const layerStyle: FillLayer = {
   id: "data",
@@ -65,7 +67,7 @@ function EstadioQGIS() {
   );
   //estado de secciones seleccionadas
   const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([]);
-  const mapRef = React.useRef<any>(null);
+  const mapRef = React.useRef<MapRef>(null);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
@@ -106,9 +108,18 @@ function EstadioQGIS() {
     });
 
     if (clickedFeatureId) {
-      mapRef.current?.flyTo({
+      // mapRef.current?.flyTo({
+      //   center: [lngLat.lng, lngLat.lat],
+      //   zoom: 19.5,
+      //   pitch: 20,
+      //   curve: 3,
+      // });
+      const angle = calculateAngle(lngLat, centralPoint);
+
+      mapRef.current?.rotateTo(angle, {
+        duration: 1000,
         center: [lngLat.lng, lngLat.lat],
-        zoom: 20,
+        zoom: 19.5,
       });
     }
   }, []);
@@ -214,7 +225,6 @@ function EstadioQGIS() {
   //   [hoveredData]
   // );
 
-  console.log("render");
   return (
     <>
       {hoveredData && (
@@ -227,8 +237,8 @@ function EstadioQGIS() {
         <Map
           ref={mapRef}
           initialViewState={{
-            latitude: -25.2921546,
-            longitude: -57.6573,
+            latitude: centralPoint.lat,
+            longitude: centralPoint.lng,
             zoom: 17.6,
           }}
           onZoom={(e) =>
