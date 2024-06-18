@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer, MapLayerMouseEvent } from "react-map-gl";
+import type { FillLayer, MapLayerMouseEvent, CircleLayer } from "react-map-gl";
 
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -67,6 +67,7 @@ function EstadioQGIS() {
   const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
     null
   );
+  const [seatData, setSeatData] = React.useState<any>(null);
   const mapRef = React.useRef<any>(null);
 
   const onHover = React.useCallback(
@@ -93,18 +94,28 @@ function EstadioQGIS() {
     [selectedFeature, hoveredFeature]
   );
 
-  const onClick = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features, lngLat } = event;
-    const clickedFeatureId = features && features[0]?.properties?.id;
+  const onClick = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features, lngLat } = event;
+      const clickedFeatureId = features && features[0]?.properties?.id;
+      if (clickedFeatureId !== selectedFeature) {
+        setSelectedFeature(clickedFeatureId || null);
 
-    setSelectedFeature(clickedFeatureId || null);
-    if (clickedFeatureId) {
-      mapRef.current?.flyTo({
-        center: [lngLat.lng, lngLat.lat],
-        zoom: 20,
-      });
-    }
-  }, []);
+        // Fetch seat data for the clicked section
+        fetch("./butacas2.geojson")
+          .then((resp) => resp.json())
+          .then((json) => {
+            // Optionally filter seats by section id here if needed
+            setSeatData(json);
+          })
+          .catch((err) => console.error("Could not load seat data", err));
+      } else {
+        setSelectedFeature(null);
+        setSeatData(null); // Clear seat data when deselecting
+      }
+    },
+    [selectedFeature]
+  );
 
   const getLayerStyles = React.useMemo(() => {
     const updatedLayerStyle: FillLayer = {
@@ -206,6 +217,51 @@ function EstadioQGIS() {
   //   },
   //   [hoveredData]
   // );
+  const handleSeatClick = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features } = event;
+      const clickedSeatId = features && features[0]?.properties?.id;
+
+      if (clickedSeatId) {
+        const seatState = seatData.features.find(
+          (seat: any) => seat.properties.id === clickedSeatId
+        )?.properties.selected;
+
+        // Update seat selection state
+        setSeatData((prevData: any) => ({
+          ...prevData,
+          features: prevData.features.map((seat: any) =>
+            seat.properties.id === clickedSeatId
+              ? {
+                  ...seat,
+                  properties: {
+                    ...seat.properties,
+                    selected: !seatState,
+                  },
+                }
+              : seat
+          ),
+        }));
+      }
+    },
+    [seatData]
+  );
+
+  const getSeatLayerStyles = React.useMemo(() => {
+    return {
+      id: "seats",
+      type: "circle" as const, // Explicitly define type as "circle"
+      paint: {
+        "circle-radius": 5,
+        "circle-color": [
+          "case",
+          ["boolean", ["get", "selected"], false],
+          "#FF0000", // selected color
+          "#00FF00", // default color
+        ],
+      },
+    };
+  }, []);
 
   console.log("render");
   return (
@@ -238,6 +294,11 @@ function EstadioQGIS() {
           <Source id="data" type="geojson" data={allData}>
             <Layer {...getLayerStyles} />
           </Source>
+          {seatData && (
+            <Source id="seats" type="geojson" data={seatData}>
+              <Layer {...getSeatLayerStyles} />
+            </Source>
+          )}
         </Map>
       )}
     </>
