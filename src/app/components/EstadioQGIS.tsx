@@ -202,6 +202,7 @@ function EstadioQGIS() {
   //   [hoveredData]
   // );
 
+  console.log("render");
   return (
     <>
       {hoveredData && (
