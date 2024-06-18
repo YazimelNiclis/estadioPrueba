@@ -66,6 +66,7 @@ function EstadioQGIS() {
   const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
     null
   );
+  const mapRef = React.useRef<any>(null);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
@@ -94,9 +95,16 @@ function EstadioQGIS() {
   );
 
   const onClick = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features } = event;
+    const { features, lngLat } = event;
     const clickedFeatureId = features && features[0]?.properties?.id;
     setSelectedFeature(clickedFeatureId || null);
+
+    if (clickedFeatureId) {
+      mapRef.current?.flyTo({
+        center: [lngLat.lng, lngLat.lat],
+        zoom: 20,
+      });
+    }
   }, []);
 
   const getLayerStyles = React.useMemo(() => {
@@ -215,6 +223,7 @@ function EstadioQGIS() {
       )}
       {allData && (
         <Map
+          ref={mapRef}
           initialViewState={{
             latitude: -25.2921546,
             longitude: -57.6573,
