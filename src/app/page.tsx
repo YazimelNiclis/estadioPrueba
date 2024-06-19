@@ -1,13 +1,12 @@
 import { NextUIProvider } from "@nextui-org/react";
 import styles from "./page.module.css";
-//import EstadioFiber from "./components/EstadioFiber";
-import EstadioQGIS from "./components/EstadioQGIS";
+import EstadioYazi from "./components/EstadioYazi";
 
 export default function Home() {
   return (
     <NextUIProvider>
       <main className={styles.main}>
-        <EstadioQGIS />
+        <EstadioYazi />
       </main>
     </NextUIProvider>
   );
