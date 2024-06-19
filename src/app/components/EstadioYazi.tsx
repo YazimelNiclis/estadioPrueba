@@ -1,11 +1,19 @@
 "use client";
-
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl";
 import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
 import { LngLatBounds } from "mapbox-gl";
 import { calculateAngle } from "../utils/utils";
-
+import { Divider } from "@nextui-org/react";
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  Link,
+  Button,
+} from "@nextui-org/react";
+import Spinner from "@/app/components/Spinner";
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 const layerStyle: FillLayer = {
@@ -46,6 +54,7 @@ const layerStyle: FillLayer = {
     "fill-opacity": 0.5,
   },
 };
+
 const centralPoint = { lat: -25.2921546, lng: -57.6573 };
 const mapBounds = new LngLatBounds(
   [-57.6595, -25.2931], // inf. izq
@@ -72,6 +81,8 @@ interface SelectedData {
 
 function EstadioYazi() {
   const [allData, setAllData] = React.useState<any>();
+  const [allDataInferior, setAllDataInferior] = React.useState<any>();
+  const [loading, setLoading] = React.useState<boolean>(true);
   const [selectedData, setSelectedData] = React.useState<
     SelectedData | undefined
   >(undefined);
@@ -270,7 +281,11 @@ function EstadioYazi() {
     fetch("./estadioJSON.geojson")
       .then((resp) => resp.json())
       .then((json) => setAllData(json))
-      .catch((err) => console.error("Could not load data", err));
+      .catch((err) => console.error("Could not load data", err))
+      .finally(() => {
+        setLoading(false);
+      });
+
     //cargo los valores iniciales del mapa
     if (mapRef.current) {
       const map = mapRef.current.getMap();
@@ -315,58 +330,94 @@ function EstadioYazi() {
   //   },
   //   [hoveredData]
   // );
-  console.log("hola");
+
   return (
-    <>
-      {hoveredData && (
-        <div className="bg-slate-500 text-white max-w-[40vw] max-h-[45vw] w-full h-full p-4 z-[1] absolute top-0 right-0 m-4 rounded-md">
-          <p>
-            Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:
-            {hoveredData.zoom} | Sector: {hoveredData.sector}
-          </p>
-          <br />
-          {selectedData && (
-            <>
-              <p className="text-xl">Datos seleccionados:</p>
-              <p>Codigo: {selectedData?.codigo}</p>
-              <p>Descripcion: {selectedData?.desc}</p>
-              <p>Id: {selectedData?.id}</p>
-              <p>Nombre: {selectedData?.nombre}</p>
-              <p>Place id: {selectedData?.place_id}</p>
-            </>
-          )}
-        </div>
-      )}
-      {allData && (
-        <div className="max-w-[50vw] absolute w-full h-full left-0 top-0 bottom-0">
-          <Map
-            ref={mapRef}
-            minZoom={17}
-            maxZoom={20.5}
-            initialViewState={{
-              latitude: centralPoint.lat,
-              longitude: centralPoint.lng,
-              zoom: 17.6,
-            }}
-            onZoom={(e) =>
-              setHoveredData((prev) => ({
-                ...prev,
-                zoom: e.viewState.zoom.toFixed(4),
-              }))
-            }
-            maxBounds={bounds}
-            mapboxAccessToken={MAPTOKEN}
-            interactiveLayerIds={["data"]}
-            onMouseMove={onHover}
-            onClick={onClick}
-          >
-            <Source id="data" type="geojson" data={allData}>
-              <Layer {...getLayerStyles} />
-            </Source>
-          </Map>
-        </div>
-      )}
-    </>
+    <div className="flex flex-col h-screen w-11/12">
+      {loading && <Spinner />}
+      <Navbar>
+        <NavbarBrand>
+          <p className="font-bold text-inherit">ITTI</p>
+        </NavbarBrand>
+        <NavbarContent className=" sm:flex gap-4" justify="center">
+          <NavbarItem>
+            <Link color="foreground" href="#">
+              Deportes
+            </Link>
+          </NavbarItem>
+          <NavbarItem isActive>
+            <Link href="#" aria-current="page">
+              Musica
+            </Link>
+          </NavbarItem>
+          <NavbarItem>
+            <Link color="foreground" href="#">
+              Eventos
+            </Link>
+          </NavbarItem>
+        </NavbarContent>
+        <NavbarContent justify="end">
+          <NavbarItem className="hidden lg:flex">
+            <Link href="#">Login</Link>
+          </NavbarItem>
+          <NavbarItem>
+            <Button as={Link} color="primary" href="#" variant="flat">
+              Sign Up
+            </Button>
+          </NavbarItem>
+        </NavbarContent>
+      </Navbar>
+      <Divider orientation="horizontal" />
+      <div className="flex flex-1">
+        {allData && (
+          <div className="w-1/2 p-4 m-4 bg-slate-200">
+            <Map
+              ref={mapRef}
+              minZoom={17}
+              maxZoom={20.5}
+              initialViewState={{
+                latitude: centralPoint.lat,
+                longitude: centralPoint.lng,
+                zoom: 17.6,
+              }}
+              onZoom={(e) =>
+                setHoveredData((prev) => ({
+                  ...prev,
+                  zoom: e.viewState.zoom.toFixed(4),
+                }))
+              }
+              maxBounds={bounds}
+              mapboxAccessToken={MAPTOKEN}
+              interactiveLayerIds={["data"]}
+              onMouseMove={onHover}
+              onClick={onClick}
+            >
+              <Source id="data" type="geojson" data={allData}>
+                <Layer {...getLayerStyles} />
+              </Source>
+            </Map>
+          </div>
+        )}
+
+        {hoveredData && (
+          <div className="bg-white text-black border-1 border-gray-200 w-1/2 p-4 z-[1] m-4 rounded-md overflow-auto">
+            <header>
+              <p className="text-3xl text-center">Recital Charly Garcia</p>
+              <br />
+              {selectedData && (
+                <>
+                  <p className="text-xl">Datos seleccionados:</p>
+                  <p>Codigo: {selectedData?.codigo}</p>
+                  <p>Descripcion: {selectedData?.desc}</p>
+                  <p>Id: {selectedData?.id}</p>
+                  <p>Nombre: {selectedData?.nombre}</p>
+                  <p>Place id: {selectedData?.place_id}</p>
+                </>
+              )}
+            </header>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
