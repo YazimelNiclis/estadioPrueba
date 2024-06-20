@@ -255,7 +255,7 @@ const MapaML: React.FC = () => {
           "#3288bd", // hover color
           ["in", ["get", "id"], ["literal", selectedSeat]],
           "#FF0000", // selected color
-          "#00FF00", // default color
+          "#C2C3C7", // default color
         ],
       },
     };
