@@ -72,7 +72,7 @@ const mapBounds = new LngLatBounds(
 );
 
 const bounds: [number, number, number, number] = [
-  -57.659, -25.2932, -57.6555, -25.291,
+  -57.65912, -25.29317, -57.6556, -25.291,
 ];
 
 interface HoverData {
@@ -404,23 +404,25 @@ function EstadioYazi() {
         {hoveredData && (
           <div className="bg-white  text-black border-l-1 border-gray-200 w-1/3 z-[1]`x mt-5 rounded-md overflow-auto">
             <header className="pl-5">
-              <div className="flex justify-end gap-2 mr-5">
-                <MdFavoriteBorder
-                  cursor={"pointer"}
-                  size={20}
-                  color="gray"
-                  onClick={() => {}}
-                  className="hover:bg-gray-200 rounded-2xl"
-                />
-                <MdOutlineInfo
-                  cursor={"pointer"}
-                  size={20}
-                  color="gray"
-                  onClick={() => {}}
-                  className="hover:bg-gray-200 rounded-2xl"
-                />
+              <div className="flex gap-2 justify-between content-center">
+                <p className="text-2xl mb-5">Selecciona tu entrada</p>
+                <div className="flex gap-2 mr-8 pr-9">
+                  <MdFavoriteBorder
+                    cursor={"pointer"}
+                    size={20}
+                    color="gray"
+                    onClick={() => {}}
+                    className="hover:bg-gray-200 rounded-2xl"
+                  />
+                  <MdOutlineInfo
+                    cursor={"pointer"}
+                    size={20}
+                    color="gray"
+                    onClick={() => {}}
+                    className="hover:bg-gray-200 rounded-2xl"
+                  />
+                </div>
               </div>
-              <p className="text-2xl  mb-5">Selecciona tu entrada</p>
               <Button className="bg-white border-2 rounded-3xl mr-3 hover:bg-gray-100 hover:border-gray-400">
                 Cantidad
               </Button>
