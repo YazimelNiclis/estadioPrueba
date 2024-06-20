@@ -277,25 +277,23 @@ const Mapa: React.FC = () => {
     };
   }, [hoveredSeat, selectedSeat]); */
   const getSeatLayerStyles = React.useMemo(() => {
-    //3args
-    const matchExpression: any[] = [
-      "match",
-      ["get", "id"],
-      ...selectedSeat.flatMap((seat) => [seat, "#FF0000"]), // Red for selected seats
-      hoveredSeat ? hoveredSeat : null,
-      "#3288bd", // Blue for hovered seat
-      "#00FF00", // Default color for other seats
-    ].filter(Boolean); // Remove null values
-
     return {
       id: "seats",
-      type: "circle",
+      type: "circle" as const,
       paint: {
         "circle-radius": 5,
-        "circle-color": matchExpression,
+        "circle-color": [
+          "case",
+          ["==", ["get", "id"], hoveredSeat],
+          "#3288bd", // hover color
+          //["==", ["get", "id"], selectedSeat],
+          ["in", ["get", "id"], ["literal", selectedSeat]],
+          "#FF0000", // selected color
+          "#00FF00", // default color
+        ],
       },
     };
-  }, [selectedSeat, hoveredSeat]);
+  }, [hoveredSeat, selectedSeat]);
 
   React.useEffect(() => {
     Promise.all([
