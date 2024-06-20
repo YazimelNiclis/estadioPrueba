@@ -88,7 +88,7 @@ const Mapa: React.FC = () => {
   const [seatData, setSeatData] = React.useState<Seat[]>([]);
   const [filteredSeatData, setFilteredSeatData] = React.useState<any[]>([]);
   const [hoveredSeat, setHoveredSeat] = React.useState<string | null>(null);
-  const [selectedSeat, setSelectedSeat] = React.useState<string[]>([]);
+  const [selectedSeat, setSelectedSeat] = React.useState<string[]>([""]);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
@@ -203,7 +203,6 @@ const Mapa: React.FC = () => {
     if (!hoveredFeature && !selectedFeature) {
       return layerStyle;
     }
-
     const updatedLayerStyle: FillLayer = {
       ...layerStyle,
       paint: {
@@ -249,44 +248,19 @@ const Mapa: React.FC = () => {
     const { features } = event;
     const seatFeature = features?.find((f) => f.layer.id === "seats");
     const hoveredSeatId = seatFeature?.properties?.id;
-    //const hoveredSeatId = features && features[0]?.properties?.id;
     setHoveredSeat(hoveredSeatId || null);
-    //console.log(hoveredSeatId, "hovered seat");
   }, []);
 
-  /*  const getSeatLayerStyles = React.useMemo(() => {
- //3args
-    const matchExpression = [
-      "match",
-      ["get", "id"],
-      ...(hoveredSeat ? [hoveredSeat, "#3288bd"] : []),
-      ...selectedSeat.flatMap((seat) => [seat, "#FF0000"]),
-      "#00FF00", // Default color for non-selected seats
-    ];
-
-    return {
-      id: "seats",
-      type: "circle" as const,
-      paint: {
-        "circle-radius": 5,
-        "circle-color":
-          matchExpression.length > 4
-            ? matchExpression
-            : ["match", ["get", "id"], "", "#00FF00"],
-      },
-    };
-  }, [hoveredSeat, selectedSeat]); */
   const getSeatLayerStyles = React.useMemo(() => {
     return {
       id: "seats",
       type: "circle" as const,
       paint: {
-        "circle-radius": 5,
+        "circle-radius": 10,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hoveredSeat],
           "#3288bd", // hover color
-          //["==", ["get", "id"], selectedSeat],
           ["in", ["get", "id"], ["literal", selectedSeat]],
           "#FF0000", // selected color
           "#00FF00", // default color
