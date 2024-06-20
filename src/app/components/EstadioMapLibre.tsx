@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import React, {
   useState,
   useCallback,
   useMemo,
@@ -9,7 +9,8 @@ import {
   LegacyRef,
 } from "react";
 import Map, { Source, Layer } from "react-map-gl/maplibre";
-import type { FillLayer, MapRef } from "react-map-gl";
+import { MapRef } from "react-map-gl/maplibre";
+import type { FillLayer } from "react-map-gl";
 
 import type {
   MapLayerMouseEvent,
@@ -17,8 +18,6 @@ import type {
   LngLat,
 } from "react-map-gl/maplibre";
 import { calculateAngle } from "../utils/utils";
-
-const MAPTOKEN = process.env.NEXT_PUBLIC_MAPLIBRE_TOKEN; // Cambia este valor al token de MapLibre si es necesario
 
 const layerStyle: FillLayer = {
   id: "data",
@@ -88,7 +87,7 @@ const initialHoveredData: HoverData = {
   zoom: 0,
 };
 
-export function EstadoMapLibre() {
+export function EstadioMapLibre() {
   const [allData, setAllData] = useState<any>();
   const [selectedData, setSelectedData] = useState<SelectedData | undefined>();
   const [hoveredData, setHoveredData] = useState<HoverData>(initialHoveredData);
@@ -160,8 +159,8 @@ export function EstadoMapLibre() {
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
         center: [lngLat.lng, lngLat.lat],
-        zoom: 20.6,
-        pitch: 50,
+        zoom: 21.5,
+        pitch: 60,
       });
     }
   };
@@ -349,7 +348,7 @@ export function EstadoMapLibre() {
       id: "seats",
       type: "circle" as const,
       paint: {
-        "circle-radius": 5,
+        "circle-radius": 10,
         "circle-opacity": isZoomedIn ? 1 : 0,
         "circle-color": circleColor,
         "circle-stroke-color": "#000000",
@@ -391,7 +390,7 @@ export function EstadoMapLibre() {
           <Map
             ref={mapRef}
             minZoom={17}
-            maxZoom={21}
+            maxZoom={23}
             initialViewState={{
               latitude: centralPoint.lat,
               longitude: centralPoint.lng,
@@ -399,8 +398,7 @@ export function EstadoMapLibre() {
             }}
             onZoom={onZoom}
             maxBounds={bounds}
-            // mapLib={import('maplibre-gl')} // Asegúrate de importar maplibre-gl en tu proyecto
-            mapboxAccessToken={MAPTOKEN}
+            // mapLib={import("maplibre-gl")}
             interactiveLayerIds={["data"]}
             onMouseMove={(e) => {
               onHover(e);
