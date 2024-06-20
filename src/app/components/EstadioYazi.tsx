@@ -5,6 +5,7 @@ import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
 import { LngLatBounds } from "mapbox-gl";
 import { calculateAngle } from "../utils/utils";
 import { Divider } from "@nextui-org/react";
+import { PiMagnifyingGlassLight } from "react-icons/pi";
 import {
   Navbar,
   NavbarBrand,
@@ -12,8 +13,17 @@ import {
   NavbarItem,
   Link,
   Button,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
 } from "@nextui-org/react";
 import Spinner from "@/app/components/Spinner";
+import { MdFavoriteBorder, MdOutlineInfo } from "react-icons/md";
+import { BsPersonSquare } from "react-icons/bs";
+import Image from "next/image";
+import { GiTicket } from "react-icons/gi";
+import { LuUserSquare, LuUserSquare2 } from "react-icons/lu";
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 const layerStyle: FillLayer = {
@@ -62,7 +72,7 @@ const mapBounds = new LngLatBounds(
 );
 
 const bounds: [number, number, number, number] = [
-  -57.659, -25.2935, -57.6557, -25.2907,
+  -57.659, -25.2932, -57.6555, -25.291,
 ];
 
 interface HoverData {
@@ -332,44 +342,37 @@ function EstadioYazi() {
   // );
 
   return (
-    <div className="flex flex-col h-screen w-11/12">
+    <div className="flex flex-col h-screen w-full">
       {loading && <Spinner />}
-      <Navbar>
-        <NavbarBrand>
-          <p className="font-bold text-inherit">ITTI</p>
+      <Navbar
+        style={{ maxWidth: "none !important" }}
+        className="flex justify-between bg-[#121519]"
+      >
+        <NavbarBrand className="ml-8">
+          <Image src="/tutiLogo.png" alt="tuti" width={100} height={100} />
         </NavbarBrand>
-        <NavbarContent className=" sm:flex gap-4" justify="center">
+        <NavbarContent className="mr-8" justify="end">
           <NavbarItem>
-            <Link color="foreground" href="#">
-              Deportes
-            </Link>
-          </NavbarItem>
-          <NavbarItem isActive>
-            <Link href="#" aria-current="page">
-              Musica
-            </Link>
+            <PiMagnifyingGlassLight color="#0BDB8F" size={25} />
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" href="#">
-              Eventos
-            </Link>
-          </NavbarItem>
-        </NavbarContent>
-        <NavbarContent justify="end">
-          <NavbarItem className="hidden lg:flex">
-            <Link href="#">Login</Link>
+            <LuUserSquare color="#0BDB8F" size={25} />
           </NavbarItem>
           <NavbarItem>
-            <Button as={Link} color="primary" href="#" variant="flat">
-              Sign Up
-            </Button>
+            <GiTicket color="#0BDB8F" size={25} />
           </NavbarItem>
         </NavbarContent>
       </Navbar>
-      <Divider orientation="horizontal" />
-      <div className="flex flex-1">
+
+      <header className="bg-[#1B2128] w-full h-12">
+        <p className="text-base text-white ml-8 pl-9">La Vela Puerca</p>
+        <p className="text-xs text-white ml-8 pl-9">
+          29 de Septiembre - 20:00 - Anfiteatro Jose A. Flores - San Bernardino
+        </p>
+      </header>
+      <div className="flex flex-1 h-2/3">
         {allData && (
-          <div className="w-1/2 p-4 m-4 bg-slate-200">
+          <div className="w-2/3 bg-slate-200  shadow-inner border-r-2 border-r-slate-300">
             <Map
               ref={mapRef}
               minZoom={17}
@@ -399,21 +402,66 @@ function EstadioYazi() {
         )}
 
         {hoveredData && (
-          <div className="bg-white text-black border-1 border-gray-200 w-1/2 p-4 z-[1] m-4 rounded-md overflow-auto">
-            <header>
-              <p className="text-3xl text-center">Recital Charly Garcia</p>
-              <br />
-              {selectedData && (
-                <>
-                  <p className="text-xl">Datos seleccionados:</p>
-                  <p>Codigo: {selectedData?.codigo}</p>
-                  <p>Descripcion: {selectedData?.desc}</p>
-                  <p>Id: {selectedData?.id}</p>
-                  <p>Nombre: {selectedData?.nombre}</p>
-                  <p>Place id: {selectedData?.place_id}</p>
-                </>
-              )}
+          <div className="bg-white  text-black border-l-1 border-gray-200 w-1/3 z-[1]`x mt-5 rounded-md overflow-auto">
+            <header className="pl-5">
+              <div className="flex justify-end gap-2 mr-5">
+                <MdFavoriteBorder
+                  cursor={"pointer"}
+                  size={20}
+                  color="gray"
+                  onClick={() => {}}
+                  className="hover:bg-gray-200 rounded-2xl"
+                />
+                <MdOutlineInfo
+                  cursor={"pointer"}
+                  size={20}
+                  color="gray"
+                  onClick={() => {}}
+                  className="hover:bg-gray-200 rounded-2xl"
+                />
+              </div>
+              <p className="text-2xl  mb-5">Selecciona tu entrada</p>
+              <Button className="bg-white border-2 rounded-3xl mr-3 hover:bg-gray-100 hover:border-gray-400">
+                Cantidad
+              </Button>
+              <Button className="bg-white border-2  rounded-3xl mr-3 hover:bg-gray-100 hover:border-gray-400">
+                Precio
+              </Button>
+              <Button className="bg-white border-2 rounded-3xl mr-3 hover:bg-gray-100 hover:border-gray-400">
+                Mejores asientos
+              </Button>
             </header>
+            <br />
+            <Divider orientation="horizontal" />
+            <div className="bg-gray-300">
+              <p className="pl-5 pb-3 pt-3">
+                <b>Preventa 2</b>
+              </p>
+            </div>
+            <Divider orientation="horizontal" />
+            {selectedData ? (
+              <>
+                <div className="pl-5 flex gap-3 mt-3 mb-3">
+                  <p className=" text-gray-700">{selectedData?.nombre}</p>
+                  <p className="text-gray-500">{selectedData?.codigo}</p>
+                </div>
+
+                <Divider />
+              </>
+            ) : (
+              allData?.features?.map((dato: any) => {
+                return (
+                  <>
+                    <div className="pl-5 flex gap-3 mt-3 mb-3">
+                      <p className=" text-gray-700">{dato.properties.nombre}</p>
+                      <p className="text-gray-500">{dato.properties.codigo}</p>
+                    </div>
+
+                    <Divider />
+                  </>
+                );
+              })
+            )}
           </div>
         )}
       </div>
