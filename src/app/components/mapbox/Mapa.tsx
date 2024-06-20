@@ -172,6 +172,16 @@ const Mapa: React.FC = () => {
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
+      const clickedSeat = features?.find((f) => f.layer.id === "seats");
+
+      /*    if (clickedSeat !== undefined) {
+        handleSeatClick(event);
+        return;
+      } */
+      if (clickedFeatureId === selectedFeature) {
+        return;
+      }
+
       if (features?.length) {
         const feature = features[0]?.properties as SelectedData;
         handleFeatureSelection(clickedFeatureId);
@@ -196,7 +206,7 @@ const Mapa: React.FC = () => {
         setFilteredSeatData([]);
       }
     },
-    [lastClickedFeature]
+    [selectedFeature, lastClickedFeature]
   );
 
   const getLayerStyles = React.useMemo(() => {
@@ -263,7 +273,7 @@ const Mapa: React.FC = () => {
           "#3288bd", // hover color
           ["in", ["get", "id"], ["literal", selectedSeat]],
           "#FF0000", // selected color
-          "#00FF00", // default color
+          "#C2C3C7", // default color
         ],
       },
     };
