@@ -132,7 +132,7 @@ const MapaML: React.FC = () => {
     [selectedFeature]
   );
 
-  /*   const handleMapRotation = (
+  const handleMapRotation = (
     lngLat: maplibregl.LngLat,
     clickedFeatureId: string | null
   ) => {
@@ -141,11 +141,11 @@ const MapaML: React.FC = () => {
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
         center: [lngLat.lng, lngLat.lat],
-        zoom: 19.5,
-        pitch: 50,
+        zoom: 21.5,
+        pitch: 60,
       });
     }
-  }; */
+  };
 
   const resetMap = () => {
     if (initialView) {
@@ -168,11 +168,7 @@ const MapaML: React.FC = () => {
       if (features?.length) {
         const feature = features[0]?.properties as SelectedData;
         handleFeatureSelection(clickedFeatureId);
-        // handleMapRotation(lngLat, clickedFeatureId);
-        mapRef.current?.flyTo({
-          center: [lngLat.lng, lngLat.lat],
-          zoom: 20,
-        });
+        handleMapRotation(lngLat, clickedFeatureId);
         setSelectedData(feature);
 
         if (clickedFeatureCodigo) {
@@ -320,8 +316,8 @@ const MapaML: React.FC = () => {
         <div className="max-w-[50vw] absolute w-full h-full left-0 top-0 bottom-0">
           <Map
             ref={mapRef}
-            //minZoom={17}
-            //maxZoom={20.5}
+            minZoom={17}
+            maxZoom={23}
             initialViewState={{
               latitude: centralPoint.lat,
               longitude: centralPoint.lng,
