@@ -1,27 +1,20 @@
 "use client";
 
 import * as React from "react";
-import Map, { Source, Layer } from "react-map-gl";
-import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
-import { LngLatBounds } from "mapbox-gl";
-import { calculateAngle } from "../utils/utils";
+import Map, { Source, Layer } from "react-map-gl/maplibre";
+import type {
+  FillLayer,
+  MapLayerMouseEvent,
+  MapRef,
+} from "react-map-gl/maplibre";
+import { LngLatBounds } from "maplibre-gl";
+import { calculateAngle } from "../../utils/utils";
 
-const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-
-const layerStyle: FillLayer = {
-  id: "data",
-  type: "fill",
-  paint: {
-    "fill-color": {
-      property: "id",
-      stops: [
-        [1, "#98CF8B"],
-        [2, "#A2B2B2"],
-      ],
-    },
-    "fill-opacity": 0.5,
-  },
-};
+interface FillColor {
+  default: string;
+  hover?: string;
+  click?: string;
+}
 
 const centralPoint = { lat: -25.2921546, lng: -57.6573 };
 const mapBounds = new LngLatBounds(
@@ -61,7 +54,7 @@ interface Seat {
   };
 }
 
-const Mapa: React.FC = () => {
+const MapaML: React.FC = () => {
   const [allData, setAllData] = React.useState<any>();
   const [selectedData, setSelectedData] = React.useState<
     SelectedData | undefined
@@ -140,7 +133,7 @@ const Mapa: React.FC = () => {
   );
 
   /*   const handleMapRotation = (
-    lngLat: mapboxgl.LngLat,
+    lngLat: maplibregl.LngLat,
     clickedFeatureId: string | null
   ) => {
     if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
@@ -175,7 +168,7 @@ const Mapa: React.FC = () => {
       if (features?.length) {
         const feature = features[0]?.properties as SelectedData;
         handleFeatureSelection(clickedFeatureId);
-        //handleMapRotation(lngLat, clickedFeatureId);
+        // handleMapRotation(lngLat, clickedFeatureId);
         mapRef.current?.flyTo({
           center: [lngLat.lng, lngLat.lat],
           zoom: 20,
@@ -200,32 +193,31 @@ const Mapa: React.FC = () => {
   );
 
   const getLayerStyles = React.useMemo(() => {
-    if (!hoveredFeature && !selectedFeature) {
-      return layerStyle;
-    }
-    const updatedLayerStyle: FillLayer = {
-      ...layerStyle,
+    const baseStyle: FillLayer = {
+      id: "data",
+      type: "fill",
+      source: "data",
       paint: {
-        ...layerStyle.paint,
-        "fill-color": [
-          "case",
-          ["==", ["get", "id"], hoveredFeature],
-          "#3288bd", // hover
-          ["==", ["get", "id"], selectedFeature],
-          "#000", // click
-          [
-            "interpolate",
-            ["linear"],
-            ["get", "id"],
-            1,
-            "#98CF8B",
-            2,
-            "#A2B2B2",
-          ],
-        ],
+        "fill-opacity": 0.5,
       },
     };
-    return updatedLayerStyle;
+
+    const fillColorExpression = [
+      "case",
+      ["==", ["get", "id"], hoveredFeature],
+      "#3288bd", // hover color
+      ["==", ["get", "id"], selectedFeature],
+      "#000", // click color
+      "#98CF8B", // default color
+    ];
+
+    return {
+      ...baseStyle,
+      paint: {
+        ...baseStyle.paint,
+        "fill-color": fillColorExpression,
+      },
+    };
   }, [hoveredFeature, selectedFeature]);
 
   const handleSeatClick = React.useCallback((event: MapLayerMouseEvent) => {
@@ -342,7 +334,6 @@ const Mapa: React.FC = () => {
               }))
             }
             maxBounds={bounds}
-            mapboxAccessToken={MAPTOKEN}
             interactiveLayerIds={["data", "seats"]}
             onMouseMove={(e) => {
               onHover(e);
@@ -372,4 +363,4 @@ const Mapa: React.FC = () => {
   );
 };
 
-export default Mapa;
+export default MapaML;

@@ -1,7 +1,7 @@
 import { NextUIProvider } from "@nextui-org/react";
 import styles from "./page.module.css";
 import EstadioYazi from "./components/EstadioYazi";
-import Mapa from "./components/Mapa";
+import Mapa from "./components/mapbox/Mapa";
 
 export default function Home() {
   return (
