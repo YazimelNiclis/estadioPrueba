@@ -1,21 +1,18 @@
 "use client";
-
 import React, {
   useState,
   useCallback,
   useMemo,
   useEffect,
   useRef,
-  LegacyRef,
 } from "react";
 import Map, { Source, Layer } from "react-map-gl/maplibre";
-import { MapRef } from "react-map-gl/maplibre";
-import type { FillLayer } from "react-map-gl";
-
 import type {
+  FillLayer,
+  MapRef,
   MapLayerMouseEvent,
   ViewStateChangeEvent,
-  LngLat,
+  SymbolLayer,
 } from "react-map-gl/maplibre";
 import { calculateAngle } from "../utils/utils";
 
@@ -85,6 +82,20 @@ const initialHoveredData: HoverData = {
   lng: "",
   sector: "Ninguno",
   zoom: 0,
+};
+
+const symbolLayerStyles: SymbolLayer = {
+  id: "labels",
+  type: "symbol",
+  source: "data",
+  layout: {
+    "text-field": ["get", "codigo"],
+    "text-size": 12,
+    "text-anchor": "right",
+  },
+  paint: {
+    "text-color": "#000000",
+  },
 };
 
 export function EstadioMapLibre() {
@@ -279,7 +290,6 @@ export function EstadioMapLibre() {
       .then((json) => setAllData(json))
       .catch((err) => console.error("Could not load data", err));
 
-    // Fetch datos de asientos (de momento solo disponible los asientos de seccion vip a)
     fetch("./seats.geojson")
       .then((resp) => resp.json())
       .then((json) => {
@@ -332,7 +342,7 @@ export function EstadioMapLibre() {
     setHoveredSeat(hoveredSeatId || null);
   }, []);
 
-  const getSeatLayerStyles = useMemo(() => {
+  const getSeatLayerStyles: CircleLayer = useMemo(() => {
     const circleColor = [
       "case",
       ["==", ["get", "id"], hoveredSeat],
@@ -398,7 +408,7 @@ export function EstadioMapLibre() {
             }}
             onZoom={onZoom}
             maxBounds={bounds}
-            // mapLib={import("maplibre-gl")}
+            mapStyle="https://demotiles.maplibre.org/style.json"
             interactiveLayerIds={["data"]}
             onMouseMove={(e) => {
               onHover(e);
@@ -411,6 +421,7 @@ export function EstadioMapLibre() {
           >
             <Source id="data" type="geojson" data={allData}>
               <Layer {...getLayerStyles} />
+              <Layer {...symbolLayerStyles} />
             </Source>
             {seatData && (
               <Source id="seats" type="geojson" data={seatData}>
