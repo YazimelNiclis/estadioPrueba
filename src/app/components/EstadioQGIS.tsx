@@ -61,7 +61,6 @@ interface HoverData {
 
 function EstadioQGIS() {
   const [allData, setAllData] = React.useState<any>();
-  console.log(allData, "all");
   const [hoveredData, setHoveredData] = React.useState<HoverData>({
     lat: "",
     lng: "",
@@ -88,7 +87,6 @@ function EstadioQGIS() {
           lat: lngLat.lat.toFixed(4),
           lng: lngLat.lng.toFixed(4),
           sector: features![0]?.properties?.nombre || "Ninguno",
-          zoom: mapRef.current.getMap().getZoom().toFixed(2),
         };
         setHoveredData(newData);
       }
@@ -105,7 +103,13 @@ function EstadioQGIS() {
         ...layerStyle.paint,
         "fill-color": [
           "case",
-          ["==", ["get", "id"], hoveredFeature],
+          [
+            "==",
+            ["get", "id"],
+            hoveredFeature && hoveredFeature !== selectedFeature
+              ? hoveredFeature
+              : null,
+          ],
           "#3288bd", // hover color
           ["==", ["get", "id"], selectedFeature],
           "#000", // selected color
@@ -182,32 +186,23 @@ function EstadioQGIS() {
   const handleSeatClick = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features } = event;
-      const clickedSeatId = features && features[0]?.properties?.id;
+      const seatFeature = features?.find((f) => f.layer.id === "seats");
+      const clickedSeatId = seatFeature?.properties?.id;
 
-      if (clickedSeatId) {
-        const seatState = seatData.features.find(
-          (seat: any) => seat.properties.id === clickedSeatId
-        )?.properties.selected;
-
-        // actualizar estado de seleccion de asiento
-        setSeatData((prevData: any) => ({
-          ...prevData,
-          features: prevData.features.map((seat: any) =>
-            seat.properties.id === clickedSeatId
-              ? {
-                  ...seat,
-                  properties: {
-                    ...seat.properties,
-                    selected: !seatState,
-                  },
-                }
-              : seat
-          ),
-        }));
+      if (clickedSeatId !== selectedSeat) {
+        setSelectedSeat(clickedSeatId || null);
+      } else {
+        setSelectedSeat(null);
       }
     },
-    [seatData]
+    [selectedSeat]
   );
+
+  const handleSeatHover = React.useCallback((event: MapLayerMouseEvent) => {
+    const { features } = event;
+    const hoveredSeatId = features && features[0]?.properties?.id;
+    setHoveredSeat(hoveredSeatId || null);
+  }, []);
 
   const getSeatLayerStyles = React.useMemo(() => {
     return {
@@ -217,13 +212,15 @@ function EstadioQGIS() {
         "circle-radius": 5,
         "circle-color": [
           "case",
-          ["boolean", ["get", "selected"], false],
+          ["==", ["get", "id"], hoveredSeat],
+          "#3288bd", // hover color
+          ["==", ["get", "id"], selectedSeat],
           "#FF0000", // selected color
           "#00FF00", // default color
         ],
       },
     };
-  }, []);
+  }, [hoveredSeat, selectedSeat]);
 
   return (
     <>
@@ -243,7 +240,7 @@ function EstadioQGIS() {
           onZoom={(e) =>
             setHoveredData((prev) => ({
               ...prev,
-              zoom: e.viewState.zoom.toFixed(2),
+              zoom: e.viewState.zoom.toFixed(4),
             }))
           }
           mapboxAccessToken={MAPTOKEN}
