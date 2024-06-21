@@ -8,7 +8,7 @@ import type {
   MapRef,
 } from "react-map-gl/maplibre";
 import { LngLatBounds } from "maplibre-gl";
-import { calculateAngle } from "../../utils/utils";
+import { calculateAngle, getSeatSize } from "../../utils/utils";
 
 interface FillColor {
   default: string;
@@ -239,12 +239,17 @@ const MapaML: React.FC = () => {
     setHoveredSeat(hoveredSeatId || null);
   }, []);
 
+  const seatSize = React.useMemo(
+    () => getSeatSize({ currentZoom: Number(hoveredData.zoom) }),
+    [hoveredData.zoom]
+  );
+
   const getSeatLayerStyles = React.useMemo(() => {
     return {
       id: "seats",
       type: "circle" as const,
       paint: {
-        "circle-radius": 10,
+        "circle-radius": seatSize,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hoveredSeat],
@@ -255,7 +260,7 @@ const MapaML: React.FC = () => {
         ],
       },
     };
-  }, [hoveredSeat, selectedSeat]);
+  }, [seatSize, hoveredSeat, selectedSeat]);
 
   React.useEffect(() => {
     Promise.all([
@@ -295,6 +300,7 @@ const MapaML: React.FC = () => {
     <>
       {hoveredData && (
         <div className="bg-slate-500 text-white max-w-[40vw] max-h-[45vw] w-full h-full p-4 z-[1] absolute top-0 right-0 m-4 rounded-md">
+          <h1>Seat size: {seatSize}</h1>
           <p>
             Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:
             {hoveredData.zoom} | Sector: {hoveredData.sector}
