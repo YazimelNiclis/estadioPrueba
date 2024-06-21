@@ -56,7 +56,6 @@ interface HoverData {
   lng: string;
   lat: string;
   zoom?: string;
-  zoom?: string;
   sector: string;
 }
 
@@ -71,19 +70,10 @@ function EstadioQGIS() {
   const [hoveredFeature, setHoveredFeature] = React.useState<string | null>(
     null
   );
+  //estado de seccion seleccionada
   const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
     null
   );
-  //asientos
-  const [seatData, setSeatData] = React.useState<any>(null);
-  const [hoveredSeat, setHoveredSeat] = React.useState<string | null>(null);
-  const [selectedSeat, setSelectedSeat] = React.useState<string | null>(null);
-  //mapa
-  const [lastClickedFeature, setLastClickedFeature] = React.useState<
-    string | null
-  >();
-  const mapRef = React.useRef<MapRef>(null);
-
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
@@ -93,68 +83,19 @@ function EstadioQGIS() {
         return;
       }
 
-      // if (!selectedFeatures.includes(hoveredFeatureId || "")) {
-      const newData: HoverData = {
-        lat: lngLat.lat.toFixed(4),
-        lng: lngLat.lng.toFixed(4),
-        sector: features![0]?.properties?.nombre || "Ninguno",
-      };
-      setHoveredData((prev) => ({ ...prev, ...newData }));
-      // }
+      if (hoveredFeatureId !== selectedFeature) {
+        const newData: HoverData = {
+          lat: lngLat.lat.toFixed(4),
+          lng: lngLat.lng.toFixed(4),
+          sector: features![0]?.properties?.nombre || "Ninguno",
+          zoom: "",
+        };
+        setHoveredData(newData);
+      }
 
       setHoveredFeature(hoveredFeatureId || null);
     },
     [selectedFeature, hoveredFeature]
-  );
-
-  const handleZoomAndPitchReset = () => {
-    mapRef.current?.setPitch(0);
-    mapRef.current?.fitBounds(mapBounds, {
-      padding: 20,
-      linear: true,
-    });
-    setLastClickedFeature(null);
-  };
-
-  const handleFeatureSelection = (clickedFeatureId: string | null) => {
-    setSelectedFeatures((prevSelected) => {
-      if (prevSelected.includes(clickedFeatureId || "")) {
-        if (clickedFeatureId === lastClickedFeature) {
-          handleZoomAndPitchReset();
-        }
-        return prevSelected.filter((id) => id !== clickedFeatureId);
-      } else {
-        setLastClickedFeature(clickedFeatureId);
-        return [...prevSelected, clickedFeatureId || ""];
-      }
-      return prevSelected;
-    });
-  };
-
-  const handleMapRotation = (
-    lngLat: mapboxgl.LngLat,
-    clickedFeatureId: string | null
-  ) => {
-    if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
-      const angle = calculateAngle(lngLat, centralPoint);
-      mapRef.current?.rotateTo(angle, {
-        duration: 1000,
-        center: [lngLat.lng, lngLat.lat],
-        zoom: 19.5,
-        pitch: 50,
-      });
-    }
-  };
-
-  const onClick = React.useCallback(
-    (event: MapLayerMouseEvent) => {
-      const { features, lngLat } = event;
-      const clickedFeatureId = features && features[0]?.properties?.id;
-
-      handleFeatureSelection(clickedFeatureId);
-      handleMapRotation(lngLat, clickedFeatureId);
-    },
-    [lastClickedFeature]
   );
 
   const getLayerStyles = React.useMemo(() => {
@@ -164,13 +105,7 @@ function EstadioQGIS() {
         ...layerStyle.paint,
         "fill-color": [
           "case",
-          [
-            "==",
-            ["get", "id"],
-            hoveredFeature && hoveredFeature !== selectedFeature
-              ? hoveredFeature
-              : null,
-          ],
+          ["==", ["get", "id"], hoveredFeature],
           "#3288bd", // hover color
           ["==", ["get", "id"], selectedFeature],
           "#000", // selected color
@@ -274,10 +209,6 @@ function EstadioQGIS() {
       )}
       {allData && (
         <Map
-          ref={mapRef}
-          minZoom={18}
-          maxZoom={20.5}
-          maxBounds={mapBounds}
           initialViewState={{
             latitude: centralPoint.lat,
             longitude: centralPoint.lng,
@@ -290,24 +221,12 @@ function EstadioQGIS() {
             }))
           }
           mapboxAccessToken={MAPTOKEN}
-          interactiveLayerIds={["data", "seats"]}
-          onMouseMove={(e) => {
-            onHover(e);
-            handleSeatHover(e);
-          }}
-          onClick={(e) => {
-            onClick(e);
-            handleSeatClick(e);
-          }}
+          interactiveLayerIds={["data"]}
+          onMouseMove={onHover}
         >
           <Source id="data" type="geojson" data={allData}>
             <Layer {...getLayerStyles} />
           </Source>
-          {seatData && (
-            <Source id="seats" type="geojson" data={seatData}>
-              <Layer {...getSeatLayerStyles} />
-            </Source>
-          )}
         </Map>
       )}
     </>

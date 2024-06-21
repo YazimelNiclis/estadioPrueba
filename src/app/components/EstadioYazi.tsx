@@ -18,9 +18,9 @@ import {
   CardBody,
   CardFooter,
 } from "@nextui-org/react";
-import Spinner from "@/components/spinner/Spinner";
+import Spinner from "@/app/components/Spinner";
 import { MdFavoriteBorder, MdOutlineInfo } from "react-icons/md";
-
+import { BsPersonSquare } from "react-icons/bs";
 import Image from "next/image";
 import { GiTicket } from "react-icons/gi";
 import { LuUserSquare, LuUserSquare2 } from "react-icons/lu";
