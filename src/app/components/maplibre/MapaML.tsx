@@ -165,6 +165,10 @@ const MapaML: React.FC = () => {
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
+      if (clickedFeatureId === selectedFeature) {
+        return;
+      }
+
       if (features?.length) {
         const feature = features[0]?.properties as SelectedData;
         handleFeatureSelection(clickedFeatureId);
@@ -202,8 +206,8 @@ const MapaML: React.FC = () => {
       "case",
       ["==", ["get", "id"], hoveredFeature],
       "#3288bd", // hover color
-      ["==", ["get", "id"], selectedFeature],
-      "#000", // click color
+      /* ["==", ["get", "id"], selectedFeature],
+      "#000", // click color */
       "#98CF8B", // default color
     ];
 
@@ -244,7 +248,7 @@ const MapaML: React.FC = () => {
       id: "seats",
       type: "circle" as const,
       paint: {
-        "circle-radius": 10,
+        "circle-radius": 5,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hoveredSeat],

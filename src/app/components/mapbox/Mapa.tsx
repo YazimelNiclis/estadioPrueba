@@ -6,6 +6,11 @@ import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
 import { LngLatBounds } from "mapbox-gl";
 import { calculateAngle } from "../../utils/utils";
 
+/**
+ * @deprecated
+ */
+// deprecated component.
+
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 const layerStyle: FillLayer = {

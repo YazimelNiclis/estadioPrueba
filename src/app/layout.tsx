@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 export const metadata: Metadata = {
   title: "estadio",
   description: "prueba de soluciones",

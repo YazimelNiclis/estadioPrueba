@@ -1,14 +1,16 @@
 import { NextUIProvider } from "@nextui-org/react";
 import styles from "./page.module.css";
-import EstadioYazi from "./components/EstadioYazi";
-import Mapa from "./components/mapbox/Mapa";
+import MapaML from "./components/maplibre/MapaML";
+import Map from "./components/maplibre/Map";
+import MapRaw from "./components/maplibre/MapaRaw";
 
 export default function Home() {
   return (
     <NextUIProvider>
       <main className={styles.main}>
-        {/*  <EstadioYazi /> */}
-        <Mapa />
+        {/* <MapaML /> */}
+        <Map />
+        {/* <MapRaw /> */}
       </main>
     </NextUIProvider>
   );
