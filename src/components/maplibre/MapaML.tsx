@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl/maplibre";
 import type {

@@ -1,15 +1,13 @@
 import { NextUIProvider } from "@nextui-org/react";
 import styles from "./page.module.css";
-import EstadioYazi from "./components/EstadioYazi";
-import Mapa from "./components/mapbox/Mapa";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <NextUIProvider>
-      <main className={styles.main}>
-        {/*  <EstadioYazi /> */}
-        <Mapa />
-      </main>
-    </NextUIProvider>
+    <main className={styles.main}>
+      <Link href="/estadio">
+        <h1 className="underline hover:text-gray-400">Go to estadio</h1>
+      </Link>
+    </main>
   );
 }
