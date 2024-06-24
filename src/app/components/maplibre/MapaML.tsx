@@ -336,7 +336,9 @@ const MapaML: React.FC = () => {
             maxBounds={bounds}
             interactiveLayerIds={["data", "seats"]}
             onMouseMove={(e) => {
-              onHover(e);
+              if (!selectedFeature) {
+                onHover(e);
+              }
               handleSeatHover(e);
             }}
             onClick={(e) => {

@@ -5,6 +5,11 @@ import maplibregl, { MapLayerMouseEvent, MapMouseEvent } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./map.css";
 
+/**
+ * @deprecated
+ */
+// deprecated component.
+
 //TEST COMP. RAW MAPLIBRE MIGRATION
 
 interface Seat {
