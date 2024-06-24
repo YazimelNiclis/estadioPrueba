@@ -87,7 +87,7 @@ export const getSeatSize = ({
   minSize = 1,
   maxSize = 9,
 }: SeatSizeParams): number => {
-  if (currentZoom < minZoom) return minSize;
+  if (currentZoom < minZoom) return 0; //minSize;
   if (currentZoom > maxZoom) return maxSize;
 
   const interpolatedSize =
