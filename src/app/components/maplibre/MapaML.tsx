@@ -11,12 +11,6 @@ import type {
 import { LngLatBounds } from "maplibre-gl";
 import { calculateAngle } from "../../utils/utils";
 
-interface FillColor {
-  default: string;
-  hover?: string;
-  click?: string;
-}
-
 const centralPoint = { lat: -25.2921546, lng: -57.6573 };
 const mapBounds = new LngLatBounds(
   [-57.6595, -25.2931], // inf. izq
@@ -269,23 +263,6 @@ const MapaML: React.FC = () => {
     };
   }, [hoveredSeat, selectedSeat]);
 
-  const getSeatNumberLayerStyles = React.useMemo((): SymbolLayer => {
-    return {
-      id: "seat-numbers",
-      type: "symbol",
-      source: "seats",
-      layout: {
-        "text-field": ["get", "id"],
-        "text-size": 10,
-        "text-anchor": "center",
-        glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
-      } as any,
-      paint: {
-        "text-color": "#000000",
-      },
-    };
-  }, []);
-
   React.useEffect(() => {
     Promise.all([
       fetch("./estadioJSON.geojson").then((resp) => resp.json()),
@@ -397,7 +374,6 @@ const MapaML: React.FC = () => {
                 data={{ type: "FeatureCollection", features: filteredSeatData }}
               >
                 <Layer {...getSeatLayerStyles} />
-                <Layer {...getSeatNumberLayerStyles} />
               </Source>
             )}
           </Map>
