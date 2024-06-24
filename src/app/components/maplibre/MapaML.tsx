@@ -6,6 +6,7 @@ import type {
   FillLayer,
   MapLayerMouseEvent,
   MapRef,
+  SymbolLayer,
 } from "react-map-gl/maplibre";
 import { LngLatBounds } from "maplibre-gl";
 import { calculateAngle } from "../../utils/utils";
@@ -77,6 +78,8 @@ const MapaML: React.FC = () => {
   //mapa
   const [initialView, setInitialView] = React.useState<any>(null);
   const mapRef = React.useRef<MapRef>(null);
+  const [zoom, setZoom] = React.useState(14.5);
+  const [isMediumOrLarger, setIsMediumOrLarger] = React.useState(false);
   //asientos
   const [seatData, setSeatData] = React.useState<Seat[]>([]);
   const [filteredSeatData, setFilteredSeatData] = React.useState<any[]>([]);
@@ -85,6 +88,8 @@ const MapaML: React.FC = () => {
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
+      if (!isMediumOrLarger) return; // Deactivate hover for md and below
+
       const { features } = event;
       const hoveredFeatureId = features && features[0]?.properties?.id;
 
@@ -162,6 +167,7 @@ const MapaML: React.FC = () => {
   const onClick = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
+
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
@@ -205,9 +211,9 @@ const MapaML: React.FC = () => {
     const fillColorExpression = [
       "case",
       ["==", ["get", "id"], hoveredFeature],
-      "#3288bd", // hover color
-      /* ["==", ["get", "id"], selectedFeature],
-      "#000", // click color */
+      "#E6F2FF", // hover color
+      ["==", ["get", "id"], selectedFeature],
+      "#E6F2FF", // click color
       "#98CF8B", // default color
     ];
 
@@ -237,6 +243,8 @@ const MapaML: React.FC = () => {
   }, []);
 
   const handleSeatHover = React.useCallback((event: MapLayerMouseEvent) => {
+    if (!isMediumOrLarger) return; // Deactivate hover for md and below
+
     const { features } = event;
     const seatFeature = features?.find((f) => f.layer.id === "seats");
     const hoveredSeatId = seatFeature?.properties?.id;
@@ -248,7 +256,7 @@ const MapaML: React.FC = () => {
       id: "seats",
       type: "circle" as const,
       paint: {
-        "circle-radius": 5,
+        "circle-radius": 8,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hoveredSeat],
@@ -260,6 +268,23 @@ const MapaML: React.FC = () => {
       },
     };
   }, [hoveredSeat, selectedSeat]);
+
+  const getSeatNumberLayerStyles = React.useMemo((): SymbolLayer => {
+    return {
+      id: "seat-numbers",
+      type: "symbol",
+      source: "seats",
+      layout: {
+        "text-field": ["get", "id"],
+        "text-size": 10,
+        "text-anchor": "center",
+        glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+      } as any,
+      paint: {
+        "text-color": "#000000",
+      },
+    };
+  }, []);
 
   React.useEffect(() => {
     Promise.all([
@@ -281,6 +306,22 @@ const MapaML: React.FC = () => {
         bearing: map.getBearing(),
       });
     }
+    const handleResize = () => {
+      const isMediumOrLarger = window.matchMedia("(min-width: 768px)").matches;
+      setIsMediumOrLarger(isMediumOrLarger);
+
+      if (isMediumOrLarger) {
+        setZoom(16.6);
+      } else {
+        setZoom(8.5);
+      }
+    };
+    // Set initial zoom based on initial screen size
+    handleResize();
+    // Add resize event listener
+    window.addEventListener("resize", handleResize);
+    // Clean up event listener on component unmount
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   React.useEffect(() => {
@@ -296,9 +337,9 @@ const MapaML: React.FC = () => {
   }, [allData]);
 
   return (
-    <>
+    <section className="w-full h-full min-h-screen  py-10 grid grid cols-1 md:grid-cols-2">
       {hoveredData && (
-        <div className="bg-slate-500 text-white max-w-[40vw] max-h-[45vw] w-full h-full p-4 z-[1] absolute top-0 right-0 m-4 rounded-md">
+        <div className="hidden md:block bg-slate-500 text-white max-w-[40vw] max-h-[45vw] w-full h-full p-4 z-[1] md:absolute top-0 right-0 m-4 rounded-md">
           <p>
             Longitude: {hoveredData.lng} | Latitude: {hoveredData.lat} | Zoom:
             {hoveredData.zoom} | Sector: {hoveredData.sector}
@@ -317,15 +358,15 @@ const MapaML: React.FC = () => {
         </div>
       )}
       {allData && (
-        <div className="max-w-[50vw] absolute w-full h-full left-0 top-0 bottom-0">
+        <div className="w-full md:max-w-[50vw] h-full">
           <Map
             ref={mapRef}
-            minZoom={17}
-            maxZoom={23}
+            /* minZoom={17}
+            maxZoom={23} */
             initialViewState={{
               latitude: centralPoint.lat,
               longitude: centralPoint.lng,
-              zoom: 17.6,
+              zoom: zoom,
             }}
             onZoom={(e) =>
               setHoveredData((prev) => ({
@@ -356,12 +397,13 @@ const MapaML: React.FC = () => {
                 data={{ type: "FeatureCollection", features: filteredSeatData }}
               >
                 <Layer {...getSeatLayerStyles} />
+                <Layer {...getSeatNumberLayerStyles} />
               </Source>
             )}
           </Map>
         </div>
       )}
-    </>
+    </section>
   );
 };
 
