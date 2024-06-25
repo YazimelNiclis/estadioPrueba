@@ -213,6 +213,7 @@ const MapaML: React.FC = () => {
 
     return {
       ...baseStyle,
+      glyphs: "http://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
       paint: {
         ...baseStyle.paint,
         "fill-color": fillColorExpression,
@@ -236,14 +237,17 @@ const MapaML: React.FC = () => {
     }
   }, []);
 
-  const handleSeatHover = React.useCallback((event: MapLayerMouseEvent) => {
-    if (!isMediumOrLarger) return; // Deactivate hover for md and below
+  const handleSeatHover = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      if (!isMediumOrLarger) return; // Deactivate hover for md and below
 
-    const { features } = event;
-    const seatFeature = features?.find((f) => f.layer.id === "seats");
-    const hoveredSeatId = seatFeature?.properties?.id;
-    setHoveredSeat(hoveredSeatId || null);
-  }, []);
+      const { features } = event;
+      const seatFeature = features?.find((f) => f.layer.id === "seats");
+      const hoveredSeatId = seatFeature?.properties?.id;
+      setHoveredSeat(hoveredSeatId || null);
+    },
+    [isMediumOrLarger]
+  );
 
   const getSeatLayerStyles = React.useMemo(() => {
     return {
@@ -262,6 +266,20 @@ const MapaML: React.FC = () => {
       },
     };
   }, [hoveredSeat, selectedSeat]);
+
+  const getSeatNumbersStyles: SymbolLayer = {
+    id: "seat-labels",
+    type: "symbol",
+    source: "seats",
+    layout: {
+      "text-field": ["get", "id"],
+      "text-size": 6,
+      "text-anchor": "center",
+    },
+    paint: {
+      "text-color": "#000000",
+    },
+  };
 
   React.useEffect(() => {
     Promise.all([
@@ -340,6 +358,7 @@ const MapaML: React.FC = () => {
             ref={mapRef}
             /* minZoom={17}
             maxZoom={23} */
+            mapStyle="https://demotiles.maplibre.org/style.json"
             initialViewState={{
               latitude: centralPoint.lat,
               longitude: centralPoint.lng,
@@ -374,6 +393,7 @@ const MapaML: React.FC = () => {
                 data={{ type: "FeatureCollection", features: filteredSeatData }}
               >
                 <Layer {...getSeatLayerStyles} />
+                <Layer {...getSeatNumbersStyles} />
               </Source>
             )}
           </Map>
