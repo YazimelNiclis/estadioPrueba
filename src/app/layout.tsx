@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "mapbox-gl/dist/mapbox-gl.css";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { NextUIProvider } from "@nextui-org/react";
+
 export const metadata: Metadata = {
   title: "estadio",
   description: "prueba de soluciones",
@@ -13,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NextUIProvider>{children}</NextUIProvider>
+      </body>
     </html>
   );
 }
