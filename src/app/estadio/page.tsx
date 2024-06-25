@@ -1,8 +1,6 @@
 import React from "react";
 import NavBar from "@/components/navbar/NavBar";
 import MapHeader from "@/clientComponents/mapa/MapHeader";
-import MapView from "@/clientComponents/mapa/MapView";
-import MapRightSection from "@/clientComponents/mapa/MapRightSection";
 import MapPadre from "@/clientComponents/mapa/MapPadre";
 
 async function getMapData() {

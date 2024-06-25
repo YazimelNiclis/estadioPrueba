@@ -1,87 +1,47 @@
 "use client";
+
 import * as React from "react";
-import Map, { Source, Layer } from "react-map-gl/maplibre";
-import type {
-  FillLayer,
-  MapLayerMouseEvent,
-  MapRef,
-} from "react-map-gl/maplibre";
-import { LngLatBounds } from "maplibre-gl";
+import Map from "react-map-gl/maplibre";
+import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
 import { calculateAngle } from "../../utils/utils";
+import { SelectedData, HoverData } from "@/utils/types/mapTypes";
+import useMapStore from "@/app/store/mapStore";
+import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
-interface FillColor {
-  default: string;
-  hover?: string;
-  click?: string;
-}
+import Layers from "./MapLayers";
 
-const centralPoint = { lat: -25.2921546, lng: -57.6573 };
-const mapBounds = new LngLatBounds(
-  [-57.6595, -25.2931], // inf. izq
-  [-57.655, -25.2912] // sup. der
-);
+function MapView() {
+  const {
+    allData,
+    selectedData,
+    setSelectedData,
+    hoveredData,
+    setHoveredData,
+    hoveredFeature,
+    setHoveredFeature,
+    selectedFeature,
+    setSelectedFeature,
+    lastClickedFeature,
+    setLastClickedFeature,
+    initialView,
+    setInitialView,
+    seatData,
 
-const bounds: [number, number, number, number] = [
-  -57.65912, -25.29317, -57.6556, -25.291,
-];
+    filteredSeatData,
+    setFilteredSeatData,
+    hoveredSeat,
+    setHoveredSeat,
+    selectedSeat,
+    setSelectedSeat,
+    zoom,
+    setZoom,
+    isMediumOrLarger,
+    setIsMediumOrLarger,
+  } = useMapStore();
 
-interface HoverData {
-  lng: string;
-  lat: string;
-  zoom: string;
-  sector: string;
-}
-interface SelectedData {
-  codigo: number;
-  desc: string;
-  id: number;
-  nombre: string;
-  place_id: number;
-}
-interface Seat {
-  type: string;
-  properties: {
-    id: number;
-    place_id: number;
-    sector_cod: string;
-    row: number;
-    seat: number;
-  };
-  geometry: {
-    type: string;
-    coordinates: [number, number];
-  };
-}
-
-function MapView(props: { data: any; seats: any }) {
-  const [allData, setAllData] = React.useState<any>(props.data);
-  const [selectedData, setSelectedData] = React.useState<
-    SelectedData | undefined
-  >(undefined);
-  const [hoveredData, setHoveredData] = React.useState<HoverData>({
-    lat: "",
-    lng: "",
-    sector: "Ninguno",
-    zoom: "",
-  });
-  const [hoveredFeature, setHoveredFeature] = React.useState<string | null>(
-    null
-  );
-  const [selectedFeature, setSelectedFeature] = React.useState<string | null>(
-    null
-  );
-  const [lastClickedFeature, setLastClickedFeature] = React.useState<
-    string | null
-  >();
-  //mapa
-  const [initialView, setInitialView] = React.useState<any>(null);
   const mapRef = React.useRef<MapRef>(null);
-  //asientos
-  const [seatData, setSeatData] = React.useState<any[]>(props.seats.features);
-  const [filteredSeatData, setFilteredSeatData] = React.useState<any[]>([]);
-  const [hoveredSeat, setHoveredSeat] = React.useState<string | null>(null);
-  const [selectedSeat, setSelectedSeat] = React.useState<string[]>([""]);
 
+  // Handler de hover de sectores
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features } = event;
@@ -108,15 +68,7 @@ function MapView(props: { data: any; seats: any }) {
     [hoveredData, selectedFeature]
   );
 
-  const handleZoomAndPitchReset = () => {
-    mapRef.current?.setPitch(0);
-    mapRef.current?.fitBounds(mapBounds, {
-      padding: 20,
-      linear: true,
-    });
-    setLastClickedFeature(null);
-  };
-
+  //Handler de seleccion de sectores
   const handleFeatureSelection = React.useCallback(
     (clickedFeatureId: string | null) => {
       if (selectedFeature === clickedFeatureId) {
@@ -139,6 +91,7 @@ function MapView(props: { data: any; seats: any }) {
       const angle = calculateAngle(lngLat, centralPoint);
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
+        //@ts-ignore
         center: [lngLat.lng, lngLat.lat],
         zoom: 21.5,
         pitch: 60,
@@ -158,9 +111,11 @@ function MapView(props: { data: any; seats: any }) {
     }
   };
 
+  // Handler click de sectores
   const onClick = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
+
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
@@ -174,10 +129,13 @@ function MapView(props: { data: any; seats: any }) {
         handleMapRotation(lngLat, clickedFeatureId);
         setSelectedData(feature);
 
+        // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
         if (clickedFeatureCodigo) {
           const filteredSeats = seatData.filter(
             (seat) => seat.properties.sector_cod === clickedFeatureCodigo
           );
+          console.log(clickedFeatureCodigo, "feat cod");
+          console.log(filteredSeats, "filteredSeats");
           setFilteredSeatData(filteredSeats);
         }
       } else {
@@ -188,52 +146,31 @@ function MapView(props: { data: any; seats: any }) {
         setFilteredSeatData([]);
       }
     },
-    [lastClickedFeature]
+    [lastClickedFeature, selectedFeature]
   );
 
-  const getLayerStyles = React.useMemo(() => {
-    const baseStyle: FillLayer = {
-      id: "data",
-      type: "fill",
-      source: "data",
-      paint: {
-        "fill-opacity": 0.5,
-      },
-    };
+  const handleSeatClick = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features } = event;
+      const seatFeature = features?.find((f) => f.layer.id === "seats");
+      const clickedSeatId = seatFeature?.properties?.id;
+      console.log(clickedSeatId, "clicked Seat");
 
-    const fillColorExpression = [
-      "case",
-      ["==", ["get", "id"], hoveredFeature],
-      "#3288bd", // hover color
-      /* ["==", ["get", "id"], selectedFeature],
-      "#000", // click color */
-      "#98CF8B", // default color
-    ];
-
-    return {
-      ...baseStyle,
-      paint: {
-        ...baseStyle.paint,
-        "fill-color": fillColorExpression,
-      },
-    };
-  }, [hoveredFeature, selectedFeature]);
-
-  const handleSeatClick = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features } = event;
-    const seatFeature = features?.find((f) => f.layer.id === "seats");
-    const clickedSeatId = seatFeature?.properties?.id;
-
-    if (clickedSeatId) {
-      setSelectedSeat((prevSelectedSeats) => {
-        if (prevSelectedSeats.includes(clickedSeatId)) {
-          return prevSelectedSeats.filter((seatId) => seatId !== clickedSeatId);
-        } else {
-          return [...prevSelectedSeats, clickedSeatId];
-        }
-      });
-    }
-  }, []);
+      if (clickedSeatId) {
+        setSelectedSeat((prevSelectedSeats: string[]) => {
+          if (prevSelectedSeats.includes(clickedSeatId)) {
+            return prevSelectedSeats.filter(
+              (seatId) => seatId !== clickedSeatId
+            );
+          } else {
+            return [...prevSelectedSeats, clickedSeatId];
+          }
+        });
+      }
+      console.log(selectedSeat, "selected seats");
+    },
+    [setSelectedSeat, selectedSeat]
+  );
 
   const handleSeatHover = React.useCallback((event: MapLayerMouseEvent) => {
     const { features } = event;
@@ -242,71 +179,51 @@ function MapView(props: { data: any; seats: any }) {
     setHoveredSeat(hoveredSeatId || null);
   }, []);
 
-  const getSeatLayerStyles = React.useMemo(() => {
-    return {
-      id: "seats",
-      type: "circle" as const,
-      paint: {
-        "circle-radius": 5,
-        "circle-color": [
-          "case",
-          ["==", ["get", "id"], hoveredSeat],
-          "#3288bd", // hover color
-          ["in", ["get", "id"], ["literal", selectedSeat]],
-          "#FF0000", // selected color
-          "#C2C3C7", // default color
-        ],
-      },
-    };
-  }, [hoveredSeat, selectedSeat]);
-
   React.useEffect(() => {
-    if (mapRef.current) {
-      const map = mapRef.current.getMap();
-      setInitialView({
-        center: map.getCenter(),
-        zoom: map.getZoom(),
-        pitch: map.getPitch(),
-        bearing: map.getBearing(),
-      });
-    }
-  }, [allData]);
+    const handleResize = () => {
+      const mediumOrLarger = window.matchMedia("(min-width: 768px)").matches;
+      setIsMediumOrLarger(mediumOrLarger);
+
+      if (isMediumOrLarger) {
+        setZoom(16.6);
+      } else {
+        setZoom(8.5);
+      }
+    };
+    // Setear zoom inicial basado en original screen sizde
+    handleResize();
+    // Resize event listener
+    window.addEventListener("resize", handleResize);
+    // Limpiar event listener al desmontar componente
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="w-2/3 overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
       <Map
         attributionControl={false}
         ref={mapRef}
-        minZoom={17}
-        maxZoom={20.5}
+        mapStyle="https://demotiles.maplibre.org/style.json"
         initialViewState={{
           latitude: centralPoint.lat,
           longitude: centralPoint.lng,
-          zoom: 17.6,
+          zoom: zoom,
         }}
+        onZoom={(e) => e.viewState.zoom.toFixed(4)}
         maxBounds={bounds}
         interactiveLayerIds={["data", "seats"]}
-        onMouseMove={(e: MapLayerMouseEvent) => {
-          onHover(e);
+        onMouseMove={(e) => {
+          if (!selectedFeature) {
+            onHover(e);
+          }
           handleSeatHover(e);
         }}
-        onClick={(e: MapLayerMouseEvent) => {
+        onClick={(e) => {
           onClick(e);
           handleSeatClick(e);
         }}
       >
-        <Source id="data" type="geojson" data={allData}>
-          <Layer {...getLayerStyles} />
-        </Source>
-        {selectedFeature && filteredSeatData.length > 0 && (
-          <Source
-            id="seats"
-            type="geojson"
-            data={{ type: "FeatureCollection", features: filteredSeatData }}
-          >
-            <Layer {...getSeatLayerStyles} />
-          </Source>
-        )}
+        <Layers allData={allData} filteredSeatData={filteredSeatData} />
       </Map>
     </div>
   );

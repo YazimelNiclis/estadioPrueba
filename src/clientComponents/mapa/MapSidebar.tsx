@@ -1,12 +1,15 @@
 "use client";
+
 import { Button, Divider } from "@nextui-org/react";
 import React from "react";
 import { MdFavoriteBorder, MdOutlineInfo } from "react-icons/md";
+import useMapStore from "@/app/store/mapStore";
+import { Feature, StadiumGeoJson } from "@/utils/types/mapTypes";
 
-function MapRightSection(props: { data: any }) {
-  const [hoveredData, setHoveredData] = React.useState([]);
-  const [selectedData, setSelectedData] = React.useState<any>(null);
-  const [mapData, setMapData] = React.useState(props.data);
+function MapSidebar() {
+  const { hoveredData, selectedData, setSelectedData, allData } = useMapStore();
+  const [mapData, setMapData] = React.useState<StadiumGeoJson>(allData);
+
   return (
     <div className="w-1/3 bg-white text-black border-l-1 border-gray-200  z-[1]`x mt-5 rounded-md overflow-auto">
       <header className="pl-5">
@@ -57,9 +60,9 @@ function MapRightSection(props: { data: any }) {
           <Divider />
         </>
       ) : (
-        mapData?.features?.map((dato: any, index: number) => {
+        mapData?.features?.map((dato: Feature, index: number) => {
           return (
-            <div id={index.toString()}>
+            <div key={index.toString()} id={index.toString()}>
               <div className="pl-5 flex gap-3 mt-3 mb-3">
                 <p className=" text-gray-700">{dato.properties.nombre}</p>
                 <p className="text-gray-500">{dato.properties.codigo}</p>
@@ -74,4 +77,4 @@ function MapRightSection(props: { data: any }) {
   );
 }
 
-export default MapRightSection;
+export default MapSidebar;
