@@ -5,6 +5,11 @@ import { OrbitControls, Plane, Edges, Line, Svg } from "@react-three/drei";
 import * as THREE from "three";
 import { Raycaster, Vector3 } from "three";
 
+/**
+ * @deprecated (to be deleted)
+ */
+//Deprecated component.
+
 // Extender OrbitControls para que esté disponible en React Three Fiber
 extend({ OrbitControls });
 

@@ -6,6 +6,11 @@ import type { FillLayer, MapLayerMouseEvent, MapRef } from "react-map-gl";
 import { calculateAngle } from "../utils/utils";
 import { LngLatBounds } from "mapbox-gl";
 
+/**
+ * @deprecated (to be deleted)
+ */
+//Deprecated component.
+
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const centralPoint = { lat: -25.2921546, lng: -57.6573 };
 const mapBounds = new LngLatBounds(

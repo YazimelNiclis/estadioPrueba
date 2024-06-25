@@ -3,6 +3,11 @@ import React, { useRef, useEffect, EventHandler } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 
+/**
+ * @deprecated (to be deleted)
+ */
+//Deprecated component.
+
 const Estadio: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
 

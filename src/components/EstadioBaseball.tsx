@@ -12,6 +12,11 @@ import {
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
+/**
+ * @deprecated (to be deleted)
+ */
+//Deprecated component.
+
 class EstadioBaseball extends Component {
   private camera: PerspectiveCamera | undefined;
   private scene: Scene | undefined;

@@ -11,20 +11,19 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  Link,
   Button,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
 } from "@nextui-org/react";
 import Spinner from "@/components/spinner/Spinner";
 import { MdFavoriteBorder, MdOutlineInfo } from "react-icons/md";
-
 import Image from "next/image";
 import { GiTicket } from "react-icons/gi";
 import { LuUserSquare, LuUserSquare2 } from "react-icons/lu";
 const MAPTOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+/**
+ * @deprecated (to be deleted)
+ */
+//Deprecated component.
 
 const layerStyle: FillLayer = {
   id: "data",
