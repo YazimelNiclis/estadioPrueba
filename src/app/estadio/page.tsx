@@ -3,6 +3,7 @@ import NavBar from "@/components/navbar/NavBar";
 import MapHeader from "@/clientComponents/mapa/MapHeader";
 import MapView from "@/clientComponents/mapa/MapView";
 import MapRightSection from "@/clientComponents/mapa/MapRightSection";
+import MapPadre from "@/clientComponents/mapa/MapPadre";
 
 async function getMapData() {
   const res = await fetch("http://localhost:3000/estadioJSON.geojson");
@@ -26,10 +27,7 @@ async function page() {
     <>
       <NavBar />
       <MapHeader />
-      <div className="flex flex-1 max-h-[45vw] w-full h-full">
-        <MapView data={mapData} seats={mapSeats} />
-        <MapRightSection data={mapData} />
-      </div>
+      <MapPadre data={mapData} seats={mapSeats} />
     </>
   );
 }
