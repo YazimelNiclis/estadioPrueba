@@ -1,4 +1,3 @@
-import { NextUIProvider } from "@nextui-org/react";
 import styles from "./page.module.css";
 import Link from "next/link";
 
