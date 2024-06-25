@@ -22,11 +22,11 @@ async function page() {
   const mapData = await getMapData();
   const mapSeats = await getMapSeats();
   return (
-    <>
+    <div className="w-full min-h-screen">
       <NavBar />
       <MapHeader />
       <MapPadre data={mapData} seats={mapSeats} />
-    </>
+    </div>
   );
 }
 

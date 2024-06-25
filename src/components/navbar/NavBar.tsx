@@ -13,14 +13,15 @@ import { GiTicket } from "react-icons/gi";
 
 function NavBar() {
   return (
-    // <NextUIProvider>
-    //<div className="flex flex-col w-full">
-    <Navbar
-      //style={{ maxWidth: "none !important" }}
-      className="w-full px-1 md:px-10 flex justify-between bg-[#121519] h-16"
-    >
+    <Navbar className="w-full px-1 md:px-10 flex justify-between bg-[#121519] h-16">
       <NavbarBrand className="">
-        <Image src="/tutiLogo.png" alt="tuti" width={80} height={40} />
+        <Image
+          className="w-auto"
+          src="/tutiLogo.png"
+          alt="tuti"
+          width={60}
+          height={40}
+        />
       </NavbarBrand>
       <NavbarContent className="pr-0.5 md:pr-5" justify="end">
         <NavbarItem>
@@ -34,8 +35,6 @@ function NavBar() {
         </NavbarItem>
       </NavbarContent>
     </Navbar>
-    // </div>
-    //</NextUIProvider>
   );
 }
 

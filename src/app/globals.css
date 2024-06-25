@@ -2,6 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-nav > header {
-  max-width: none !important;
+.screen-h {
+  min-height: calc(100vh - 8.5rem);
 }

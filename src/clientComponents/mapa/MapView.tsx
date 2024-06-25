@@ -26,7 +26,6 @@ function MapView() {
     initialView,
     setInitialView,
     seatData,
-
     filteredSeatData,
     setFilteredSeatData,
     hoveredSeat,
@@ -199,7 +198,7 @@ function MapView() {
   }, []);
 
   return (
-    <div className="w-2/3 overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
+    <div className="w-full md:col-span-3 h-full overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
       <Map
         attributionControl={false}
         ref={mapRef}

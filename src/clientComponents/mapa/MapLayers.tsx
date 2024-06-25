@@ -15,7 +15,7 @@ import { Seat, StadiumGeoJson } from "@/utils/types/mapTypes";
 */
 
 interface LayersProps {
-  allData: StadiumGeoJson;
+  allData: StadiumGeoJson | null;
   filteredSeatData: any[];
 }
 

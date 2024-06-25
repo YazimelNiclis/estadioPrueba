@@ -18,11 +18,11 @@ const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
   useEffect(() => {
     setAllData(data);
     setSeatData(seats.features);
-    console.log(seats.features, "ALL SEATS");
+    console.log(seats, "ALL SEATS");
   }, [data, seats, setAllData, setSeatData]);
 
   return (
-    <div className="flex flex-1 max-h-[45vw] w-full h-full">
+    <div className="w-full h-full screen-h grid grid-cols-1 md:grid-cols-5">
       <MapView />
       <MapSidebar />
     </div>
