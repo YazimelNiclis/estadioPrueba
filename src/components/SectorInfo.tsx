@@ -1,6 +1,7 @@
 import React from "react";
 import { Divider } from "@nextui-org/react";
-import { FeatureProperties } from "@/utils/types/mapTypes"; // Adjust the import path as necessary
+import { FeatureProperties, SelectedData } from "@/utils/types/mapTypes"; // Adjust the import path as necessary
+import useMapStore from "@/app/store/mapStore";
 
 const currencyFormatter = new Intl.NumberFormat("es-PY", {
   style: "currency",
@@ -18,9 +19,22 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
   availableTickets,
   price,
 }) => {
+  const { setSelectedData } = useMapStore();
+
+  const onClick = () => {
+    const selectedData = {
+      ...properties,
+      codigo: Number(properties.codigo),
+    } as SelectedData;
+    setSelectedData(selectedData);
+  };
+
   return (
     <>
-      <div className="flex justify-between mt-1 p-4 gap-2 hover:cursor-pointer hover:bg-slate-50">
+      <div
+        className="flex justify-between mt-1 p-4 gap-2 hover:cursor-pointer hover:bg-slate-50"
+        onClick={onClick}
+      >
         <div className="flex flex-col justify-center gap-1">
           <h2 className="text-lg font-semibold">{properties.nombre}</h2>
           {!!availableTickets && (
