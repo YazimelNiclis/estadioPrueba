@@ -11,7 +11,7 @@ async function getMapData() {
   return res.json();
 }
 async function getMapSeats() {
-  const res = await fetch("http://localhost:3000/seats.geojson");
+  const res = await fetch("http://localhost:3000/asientos.geojson");
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }

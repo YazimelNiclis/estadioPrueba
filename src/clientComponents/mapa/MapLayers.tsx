@@ -8,16 +8,14 @@ import {
   SymbolLayer,
   CircleLayer,
 } from "react-map-gl/maplibre";
-import {
-  getLayerStyles,
-  getSeatLayerStyles,
-  getSeatNumbersStyle,
-} from "./layerStyles";
 import useMapStore from "@/app/store/mapStore";
-import { Seat, StadiumGeoJson } from "@/utils/types/mapTypes";
+import { StadiumGeoJson } from "@/utils/types/mapTypes";
 
 /* 
-  Componente a cargo de la creacion de las capas/layers del mapa.
+  Componente a cargo de la creacion de las capas/layers del mapa con sus correspondientes estilos.
+  Docs:
+    https://visgl.github.io/react-map-gl/docs/api-reference/layer
+    https://docs.mapbox.com/help/glossary/style/ 
 */
 
 interface LayersProps {
@@ -29,10 +27,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
   const { hoveredFeature, selectedFeature, hoveredSeat, selectedSeat } =
     useMapStore();
 
-  /*   const fillLayerStyle = getLayerStyles(hoveredFeature, selectedFeature);
-  const seatLayerStyle = getSeatLayerStyles(hoveredSeat, selectedSeat);
-  const seatNumbersStyle = getSeatNumbersStyle; */
-
+  // Estadio
   const getLayerStyles = React.useMemo(() => {
     const baseStyle: FillLayer = {
       id: "data",
@@ -54,6 +49,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
     return baseStyle;
   }, [hoveredFeature, selectedFeature]);
 
+  // Asientos
   const getSeatLayerStyles: CircleLayer = React.useMemo(() => {
     return {
       id: "seats",
@@ -77,6 +73,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
     };
   }, [hoveredSeat, selectedSeat]);
 
+  // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {
     id: "seat-labels",
     type: "symbol",
