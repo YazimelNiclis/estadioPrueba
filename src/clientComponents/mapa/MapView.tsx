@@ -64,22 +64,7 @@ function MapView() {
       };
       setHoveredData(newData);
     },
-    [hoveredData, selectedFeature]
-  );
-
-  //Handler de seleccion de sectores
-  const handleFeatureSelection = React.useCallback(
-    (clickedFeatureId: string | null) => {
-      if (selectedFeature === clickedFeatureId) {
-        setLastClickedFeature(null);
-        setSelectedFeature(null);
-        setFilteredSeatData([]);
-      } else {
-        setSelectedFeature(clickedFeatureId);
-        setLastClickedFeature(clickedFeatureId);
-      }
-    },
-    [selectedFeature]
+    [hoveredData, hoveredFeature, selectedFeature]
   );
 
   const handleMapRotation = (
@@ -115,6 +100,10 @@ function MapView() {
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
 
+      // Chequear si el click sucedio en la capa de asientos
+      const layer = features?.find((f) => f.layer.id === "seats");
+      if (layer) return;
+
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
@@ -137,8 +126,6 @@ function MapView() {
           const filteredSeats = seatData.filter(
             (seat) => seat.properties.sector_cod === clickedFeatureCodigo
           );
-          console.log(clickedFeatureCodigo, "feat cod");
-          console.log(filteredSeats, "filteredSeats");
           setFilteredSeatData(filteredSeats);
         }
       } else {
@@ -206,10 +193,6 @@ function MapView() {
     // Limpiar event listener al desmontar componente
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  React.useEffect(() => {
-    console.log(selectedSeat, "selected seats");
-  }, [selectedSeat]);
 
   return (
     <div className="w-full md:col-span-3 h-full overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
