@@ -22,7 +22,7 @@ const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
   }, [data, seats, setAllData, setSeatData]);
 
   return (
-    <div className="w-full h-full min-h-screen md:screen-h grid grid-cols-1 md:grid-cols-5">
+    <div className="w-full md:h-full screen-h grid grid-cols-1 md:grid-cols-5">
       <MapView />
       <MapSidebar />
     </div>

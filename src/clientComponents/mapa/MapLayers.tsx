@@ -1,7 +1,13 @@
 "use client";
 
 import React from "react";
-import { Source, Layer } from "react-map-gl/maplibre";
+import {
+  Source,
+  Layer,
+  FillLayer,
+  SymbolLayer,
+  CircleLayer,
+} from "react-map-gl/maplibre";
 import {
   getLayerStyles,
   getSeatLayerStyles,
@@ -23,15 +29,73 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
   const { hoveredFeature, selectedFeature, hoveredSeat, selectedSeat } =
     useMapStore();
 
-  const fillLayerStyle = getLayerStyles(hoveredFeature, selectedFeature);
+  /*   const fillLayerStyle = getLayerStyles(hoveredFeature, selectedFeature);
   const seatLayerStyle = getSeatLayerStyles(hoveredSeat, selectedSeat);
-  const seatNumbersStyle = getSeatNumbersStyle;
+  const seatNumbersStyle = getSeatNumbersStyle; */
+
+  const getLayerStyles = React.useMemo(() => {
+    const baseStyle: FillLayer = {
+      id: "data",
+      type: "fill",
+      source: "data",
+      paint: {
+        "fill-opacity": 0.5,
+        "fill-color": [
+          "case",
+          ["==", ["get", "id"], hoveredFeature || ""],
+          "#E6F2FF", // hover color
+          ["==", ["get", "id"], selectedFeature || ""],
+          "#E6F2FF", // click color
+          "#98CF8B", // default color
+        ],
+      },
+    };
+
+    return baseStyle;
+  }, [hoveredFeature, selectedFeature]);
+
+  const getSeatLayerStyles: CircleLayer = React.useMemo(() => {
+    return {
+      id: "seats",
+      type: "circle" as const,
+      source: "seats",
+      paint: {
+        "circle-radius": 8,
+        "circle-color": [
+          "case",
+          ["==", ["get", "id"], hoveredSeat || ""],
+          "#3288bd", // hover color
+          [
+            "in",
+            ["get", "id"],
+            ["literal", selectedSeat.length ? selectedSeat : [""]],
+          ],
+          "#FF0000", // selected color
+          "#C2C3C7", // default color
+        ],
+      },
+    };
+  }, [hoveredSeat, selectedSeat]);
+
+  const getSeatNumbersStyles: SymbolLayer = {
+    id: "seat-labels",
+    type: "symbol",
+    source: "seats",
+    layout: {
+      "text-field": ["get", "id"],
+      "text-size": 6,
+      "text-anchor": "center",
+    },
+    paint: {
+      "text-color": "#000000",
+    },
+  };
 
   return (
     <>
       {allData && (
         <Source id="data" type="geojson" data={allData}>
-          <Layer {...fillLayerStyle} />
+          <Layer {...getLayerStyles} />
         </Source>
       )}
       {filteredSeatData && filteredSeatData.length > 0 && (
@@ -40,8 +104,8 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
           type="geojson"
           data={{ type: "FeatureCollection", features: filteredSeatData }}
         >
-          <Layer {...seatLayerStyle} />
-          <Layer {...seatNumbersStyle} />
+          <Layer {...getSeatLayerStyles} />
+          <Layer {...getSeatNumbersStyles} />
         </Source>
       )}
     </>

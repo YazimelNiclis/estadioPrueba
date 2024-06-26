@@ -39,10 +39,11 @@ export const getLayerStyles = (
 export const getSeatLayerStyles = (
   hoveredSeat: string | null,
   selectedSeat: string[]
-) => {
+): CircleLayer => {
   return {
     id: "seats",
     type: "circle" as const,
+    source: "seats",
     paint: {
       "circle-radius": 8,
       "circle-color": [

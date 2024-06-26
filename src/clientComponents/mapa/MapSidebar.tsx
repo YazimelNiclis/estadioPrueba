@@ -8,7 +8,7 @@ import { Feature, StadiumGeoJson } from "@/utils/types/mapTypes";
 
 function MapSidebar() {
   const { hoveredData, selectedData, setSelectedData, allData } = useMapStore();
-  const [mapData, setMapData] = React.useState(allData);
+  const [mapData, setMapData] = React.useState<StadiumGeoJson | null>(allData);
 
   return (
     <div className="w-full md:col-span-2 h-full bg-white text-black border-l-1 border-gray-200  z-[1]`x mt-5 rounded-md overflow-auto">

@@ -124,7 +124,11 @@ function MapView() {
 
       if (features?.length) {
         const feature = features[0]?.properties as SelectedData;
-        handleFeatureSelection(clickedFeatureId);
+
+        //handleFeatureSelection(clickedFeatureId);
+        setSelectedFeature(clickedFeatureId);
+        setLastClickedFeature(clickedFeatureId);
+
         handleMapRotation(lngLat, clickedFeatureId);
         setSelectedData(feature);
 
@@ -153,22 +157,28 @@ function MapView() {
       const { features } = event;
       const seatFeature = features?.find((f) => f.layer.id === "seats");
       const clickedSeatId = seatFeature?.properties?.id;
-      console.log(clickedSeatId, "clicked Seat");
 
       if (clickedSeatId) {
-        setSelectedSeat((prevSelectedSeats: string[]) => {
-          if (prevSelectedSeats.includes(clickedSeatId)) {
-            return prevSelectedSeats.filter(
+        if (selectedSeat.length >= 1) {
+          if (selectedSeat.includes(clickedSeatId)) {
+            const removeSeat = selectedSeat.filter(
               (seatId) => seatId !== clickedSeatId
             );
+            setSelectedSeat(removeSeat);
+            return removeSeat;
           } else {
-            return [...prevSelectedSeats, clickedSeatId];
+            const addNewSeat = [...selectedSeat, clickedSeatId];
+            setSelectedSeat(addNewSeat);
+            return addNewSeat;
           }
-        });
+        } else {
+          const addSeat = [clickedSeatId];
+          setSelectedSeat(addSeat);
+          return addSeat;
+        }
       }
-      console.log(selectedSeat, "selected seats");
     },
-    [setSelectedSeat, selectedSeat]
+    [selectedSeat]
   );
 
   const handleSeatHover = React.useCallback((event: MapLayerMouseEvent) => {
@@ -196,6 +206,10 @@ function MapView() {
     // Limpiar event listener al desmontar componente
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  React.useEffect(() => {
+    console.log(selectedSeat, "selected seats");
+  }, [selectedSeat]);
 
   return (
     <div className="w-full md:col-span-3 h-full overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
