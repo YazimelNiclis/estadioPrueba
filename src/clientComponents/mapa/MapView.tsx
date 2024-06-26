@@ -6,9 +6,13 @@ import type {
   MapLayerMouseEvent,
   MapRef,
 } from "react-map-gl/maplibre";
-import { LngLatBounds } from "maplibre-gl";
+import { LngLat, LngLatBounds } from "maplibre-gl";
 import { calculateAngle } from "../../utils/utils";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { useEffect } from "react";
+import { centroid } from "@turf/turf";
 interface FillColor {
   default: string;
   hover?: string;
@@ -81,6 +85,25 @@ function MapView(props: { data: any; seats: any }) {
   const [filteredSeatData, setFilteredSeatData] = React.useState<any[]>([]);
   const [hoveredSeat, setHoveredSeat] = React.useState<string | null>(null);
   const [selectedSeat, setSelectedSeat] = React.useState<string[]>([""]);
+  const { selectedData: reduxSelectedData } = useSelector(
+    (state: RootState) => state.map
+  );
+
+  React.useEffect(() => {
+    if (reduxSelectedData) {
+      const feature = props.data.features.find(
+        (f: any) => f.properties.id === reduxSelectedData.properties.id
+      );
+      if (feature) {
+        const centroidCoordinates = centroid(feature).geometry.coordinates;
+        const lngLat = new LngLat(
+          centroidCoordinates[0],
+          centroidCoordinates[1]
+        );
+        handleMapRotation(lngLat, reduxSelectedData.properties.id);
+      }
+    }
+  }, [reduxSelectedData, props.data]);
 
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
