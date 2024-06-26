@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import Map, { Source, Layer } from "react-map-gl/maplibre";
 import type {
@@ -9,7 +8,8 @@ import type {
   SymbolLayer,
 } from "react-map-gl/maplibre";
 import { LngLatBounds } from "maplibre-gl";
-import { calculateAngle } from "../../utils/utils";
+import { calculateAngle, getSeatSize } from "../../utils/utils";
+import mapStyle from "../../../../public/mapStyle.json";
 
 const centralPoint = { lat: -25.2921546, lng: -57.6573 };
 const mapBounds = new LngLatBounds(
@@ -72,8 +72,8 @@ const MapaML: React.FC = () => {
   //mapa
   const [initialView, setInitialView] = React.useState<any>(null);
   const mapRef = React.useRef<MapRef>(null);
-  const [zoom, setZoom] = React.useState(14.5);
-  const [isMediumOrLarger, setIsMediumOrLarger] = React.useState(false);
+   const [zoom, setZoom] = React.useState(17.5);
+   const [isMediumOrLarger, setIsMediumOrLarger] = React.useState(false);
   //asientos
   const [seatData, setSeatData] = React.useState<Seat[]>([]);
   const [filteredSeatData, setFilteredSeatData] = React.useState<any[]>([]);
@@ -108,24 +108,17 @@ const MapaML: React.FC = () => {
     [hoveredData, selectedFeature]
   );
 
-  const handleZoomAndPitchReset = () => {
-    mapRef.current?.setPitch(0);
-    mapRef.current?.fitBounds(mapBounds, {
-      padding: 20,
-      linear: true,
-    });
-    setLastClickedFeature(null);
-  };
-
   const handleFeatureSelection = React.useCallback(
     (clickedFeatureId: string | null) => {
       if (selectedFeature === clickedFeatureId) {
         setLastClickedFeature(null);
         setSelectedFeature(null);
         setFilteredSeatData([]);
+        setHoveredFeature(null);
       } else {
         setSelectedFeature(clickedFeatureId);
         setLastClickedFeature(clickedFeatureId);
+        setHoveredFeature(null);
       }
     },
     [selectedFeature]
@@ -161,7 +154,6 @@ const MapaML: React.FC = () => {
   const onClick = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features, lngLat } = event;
-
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
@@ -187,10 +179,13 @@ const MapaML: React.FC = () => {
         resetMap();
         setSelectedData(undefined);
         setFilteredSeatData([]);
+        setHoveredFeature(null); 
       }
     },
     [lastClickedFeature]
   );
+
+  
 
   const getLayerStyles = React.useMemo(() => {
     const baseStyle: FillLayer = {
@@ -205,7 +200,7 @@ const MapaML: React.FC = () => {
     const fillColorExpression = [
       "case",
       ["==", ["get", "id"], hoveredFeature],
-      "#E6F2FF", // hover color
+      "#E6F2FF", // hover color 8b6488
       ["==", ["get", "id"], selectedFeature],
       "#E6F2FF", // click color
       "#98CF8B", // default color
@@ -221,6 +216,24 @@ const MapaML: React.FC = () => {
     };
   }, [hoveredFeature, selectedFeature]);
 
+  const symbolLayerStyles = {
+    id: "labels",
+    type: "symbol",
+    source: "data",
+    layout: {
+      "text-field": ["get", "codigo"],
+      "text-size": 10,
+      "text-anchor": "center",
+      "text-padding": 10,
+      "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#000000",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 6,
+    },
+  };
+  
   const handleSeatClick = React.useCallback((event: MapLayerMouseEvent) => {
     const { features } = event;
     const seatFeature = features?.find((f) => f.layer.id === "seats");
@@ -249,12 +262,17 @@ const MapaML: React.FC = () => {
     [isMediumOrLarger]
   );
 
+  const seatSize = React.useMemo(
+    () => getSeatSize({ currentZoom: Number(hoveredData.zoom) }),
+    [hoveredData.zoom]
+  );
+
   const getSeatLayerStyles = React.useMemo(() => {
     return {
       id: "seats",
       type: "circle" as const,
       paint: {
-        "circle-radius": 8,
+        "circle-radius": seatSize,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hoveredSeat],
@@ -265,7 +283,7 @@ const MapaML: React.FC = () => {
         ],
       },
     };
-  }, [hoveredSeat, selectedSeat]);
+  }, [seatSize, hoveredSeat, selectedSeat]);
 
   const getSeatNumbersStyles: SymbolLayer = {
     id: "seat-labels",
@@ -273,7 +291,7 @@ const MapaML: React.FC = () => {
     source: "seats",
     layout: {
       "text-field": ["get", "id"],
-      "text-size": 6,
+      "text-size": seatSize,
       "text-anchor": "center",
     },
     paint: {
@@ -356,9 +374,9 @@ const MapaML: React.FC = () => {
         <div className="w-full md:max-w-[50vw] h-full">
           <Map
             ref={mapRef}
-            /* minZoom={17}
-            maxZoom={23} */
-            mapStyle="https://demotiles.maplibre.org/style.json"
+             minZoom={17}
+            maxZoom={23} 
+            mapStyle={mapStyle}
             initialViewState={{
               latitude: centralPoint.lat,
               longitude: centralPoint.lng,
@@ -385,6 +403,7 @@ const MapaML: React.FC = () => {
           >
             <Source id="data" type="geojson" data={allData}>
               <Layer {...getLayerStyles} />
+              <Layer {...symbolLayerStyles} />
             </Source>
             {selectedFeature && filteredSeatData.length > 0 && (
               <Source
