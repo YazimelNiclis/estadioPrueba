@@ -11,8 +11,6 @@ interface MapPadreProps {
 }
 
 const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
-  //manejar estados aquiii
-
   const { setAllData, setSeatData } = useMapStore();
 
   useEffect(() => {

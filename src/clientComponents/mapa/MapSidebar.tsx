@@ -6,6 +6,10 @@ import { MdFavoriteBorder, MdOutlineInfo } from "react-icons/md";
 import useMapStore from "@/app/store/mapStore";
 import { Feature, StadiumGeoJson } from "@/utils/types/mapTypes";
 
+/* 
+  Sidebar al lado del mapa.
+*/
+
 function MapSidebar() {
   const { hoveredData, selectedData, setSelectedData, allData } = useMapStore();
   const [mapData, setMapData] = React.useState<StadiumGeoJson | null>(allData);

@@ -10,10 +10,13 @@ import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Layers from "./MapLayers";
 
+/* 
+  Mapa. Componente a cargo de renderizar el mapa y manejo de interacciones con el mismo.
+*/
+
 function MapView() {
   const {
     allData,
-    selectedData,
     setSelectedData,
     hoveredData,
     setHoveredData,
@@ -24,11 +27,10 @@ function MapView() {
     lastClickedFeature,
     setLastClickedFeature,
     initialView,
-    setInitialView,
+
     seatData,
     filteredSeatData,
     setFilteredSeatData,
-    hoveredSeat,
     setHoveredSeat,
     selectedSeat,
     setSelectedSeat,
@@ -107,14 +109,14 @@ function MapView() {
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
+      // Chequear si el mismo sector fue clickeado otra vez
       if (clickedFeatureId === selectedFeature) {
         return;
       }
 
       if (features?.length) {
         const feature = features[0]?.properties as SelectedData;
-
-        //handleFeatureSelection(clickedFeatureId);
+        // Actualizar estado de sector seleccionado
         setSelectedFeature(clickedFeatureId);
         setLastClickedFeature(clickedFeatureId);
 
@@ -147,6 +149,7 @@ function MapView() {
 
       if (clickedSeatId) {
         if (selectedSeat.length >= 1) {
+          // Si el asiento ya esta seleccionado, remover el asiento
           if (selectedSeat.includes(clickedSeatId)) {
             const removeSeat = selectedSeat.filter(
               (seatId) => seatId !== clickedSeatId
@@ -154,6 +157,7 @@ function MapView() {
             setSelectedSeat(removeSeat);
             return removeSeat;
           } else {
+            // Si no pertenece al array de elegidos, agregar el asiento
             const addNewSeat = [...selectedSeat, clickedSeatId];
             setSelectedSeat(addNewSeat);
             return addNewSeat;
@@ -176,6 +180,7 @@ function MapView() {
   }, []);
 
   React.useEffect(() => {
+    // Chequear screen size
     const handleResize = () => {
       const mediumOrLarger = window.matchMedia("(min-width: 768px)").matches;
       setIsMediumOrLarger(mediumOrLarger);
@@ -186,7 +191,7 @@ function MapView() {
         setZoom(8.5);
       }
     };
-    // Setear zoom inicial basado en original screen sizde
+    // Setear zoom inicial basado en original screen size
     handleResize();
     // Resize event listener
     window.addEventListener("resize", handleResize);
