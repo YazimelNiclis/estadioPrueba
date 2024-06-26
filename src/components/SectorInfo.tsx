@@ -32,7 +32,7 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
   return (
     <>
       <div
-        className="flex justify-between mt-1 p-4 gap-2 hover:cursor-pointer hover:bg-slate-50"
+        className="flex justify-between mt-1 p-4 gap-2 hover:cursor-pointer hover:bg-slate-50 text-balance"
         onClick={onClick}
       >
         <div className="flex flex-col justify-center gap-1">
@@ -43,7 +43,7 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
             </span>
           )}
         </div>
-        <div className="flex flex-col justify-center gap-1">
+        <div className="flex flex-col justify-center gap-1 text-right">
           <h2 className="text-lg font-semibold">
             {currencyFormatter.format(price)}
           </h2>
