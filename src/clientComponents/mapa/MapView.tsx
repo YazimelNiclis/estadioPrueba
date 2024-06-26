@@ -27,7 +27,7 @@ function MapView() {
     lastClickedFeature,
     setLastClickedFeature,
     initialView,
-
+    setInitialView,
     seatData,
     filteredSeatData,
     setFilteredSeatData,
@@ -77,7 +77,6 @@ function MapView() {
       const angle = calculateAngle(lngLat, centralPoint);
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
-        //@ts-ignore
         center: [lngLat.lng, lngLat.lat],
         zoom: 21.5,
         pitch: 60,
@@ -93,6 +92,13 @@ function MapView() {
         zoom: initialView.zoom,
         pitch: initialView.pitch,
         bearing: initialView.bearing,
+      });
+    } else {
+      // Temporal fix
+      mapRef.current?.easeTo({
+        duration: 1000,
+        center: [-57.6573, -25.2921546],
+        zoom: zoom,
       });
     }
   };
