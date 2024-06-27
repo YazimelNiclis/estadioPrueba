@@ -20,7 +20,7 @@ function MapSidebar() {
   }, [allData]);
 
   return (
-    <div className="w-full md:col-span-2 h-full bg-white text-black border-l-1 border-gray-200  z-[1] p-4 rounded-md overflow-auto">
+    <div className="w-full md:col-span-2 h-full bg-white text-black border-l-1 border-gray-200  z-[1] p-4 rounded-md overflow-y-scroll max-h-[75vh]">
       <Accordion showDivider={false}>
         <AccordionItem
           classNames={{
