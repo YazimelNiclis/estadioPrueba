@@ -79,7 +79,7 @@ function MapView() {
         duration: 1000,
         //@ts-ignore
         center: [lngLat.lng, lngLat.lat],
-        zoom: 21.5,
+        zoom: 20.5,
         pitch: 60,
       });
     }

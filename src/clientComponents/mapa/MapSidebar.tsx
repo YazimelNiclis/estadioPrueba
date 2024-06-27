@@ -12,8 +12,8 @@ function MapSidebar() {
 
   const sectorData = useMemo(() => {
     return allData?.features?.map(({ properties }: Feature) => {
-      const availableTickets = generateRandomInteger(5);
-      const price = generateRandomInteger(10) * 10000;
+      const availableTickets = generateRandomInteger(3);
+      const price = (generateRandomInteger(10) + 1) * 10000;
 
       return { properties, availableTickets, price };
     });
@@ -21,15 +21,23 @@ function MapSidebar() {
 
   return (
     <div className="w-full md:col-span-2 h-full bg-white text-black border-l-1 border-gray-200  z-[1] p-4 rounded-md overflow-auto">
-      <Accordion variant="splitted">
+      <Accordion showDivider={false}>
         <AccordionItem
-          classNames={{ title: "font-bold" }}
+          classNames={{
+            title: "font-bold",
+            heading: "bg-[#EEF4F9] px-4 rounded-lg",
+          }}
+          className="my-4"
           key="1"
           title="Fecha del evento"
           subtitle={<span>20 de marzo - 20:00</span>}
         ></AccordionItem>
         <AccordionItem
-          classNames={{ title: "font-bold" }}
+          classNames={{
+            title: "font-bold",
+            heading: "bg-[#EEF4F9] px-4 rounded-lg",
+          }}
+          className="my-4"
           key="2"
           title="Seleccionar entradas"
         >
