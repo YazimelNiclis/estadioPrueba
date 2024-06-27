@@ -19,6 +19,7 @@ import { centroid } from "@turf/turf";
 function MapView() {
   const {
     allData,
+    selectedData,
     setSelectedData,
     hoveredData,
     setHoveredData,
@@ -79,6 +80,7 @@ function MapView() {
       const angle = calculateAngle(lngLat, centralPoint);
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
+        // @ts-ignore
         center: [lngLat.lng, lngLat.lat],
         zoom: 20.5,
         pitch: 60,
