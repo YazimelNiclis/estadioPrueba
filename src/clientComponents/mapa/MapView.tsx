@@ -44,8 +44,7 @@ function MapView() {
     isMediumOrLarger,
     setIsMediumOrLarger,
     seatSize,
-    setSeatSize
-    
+    setSeatSize,
     popupInfo,
     setPopupInfo,
   } = useMapStore();
@@ -78,7 +77,6 @@ function MapView() {
     [hoveredData, hoveredFeature, selectedFeature]
   );
 
-  
   const handleZoom = (e) => {
     setHoveredData((prev) => ({
       ...prev,
@@ -224,7 +222,6 @@ function MapView() {
     [setHoveredSeat]
   );
 
-
   React.useEffect(() => {
     // Chequear screen size
     const handleResize = () => {
@@ -310,7 +307,11 @@ function MapView() {
           handleSeatClick(e);
         }}
       >
-        <Layers allData={allData} filteredSeatData={filteredSeatData} seatSize={seatSize} />
+        <Layers
+          allData={allData}
+          filteredSeatData={filteredSeatData}
+          seatSize={seatSize}
+        />
         {popupInfo && (
           <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
         )}
