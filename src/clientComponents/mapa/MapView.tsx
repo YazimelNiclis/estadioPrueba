@@ -135,6 +135,8 @@ function MapView() {
         handleMapRotation(lngLat, clickedFeatureId);
         //    // setSelectedData(feature);
 
+        setSelectedSeat([]);
+
         // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
         if (clickedFeatureCodigo) {
           const filteredSeats = seatData.filter(
