@@ -6,6 +6,10 @@ import {
   StadiumGeoJson,
 } from "@/utils/types/mapTypes";
 
+/* 
+  Zustand map store.
+*/
+
 interface MapStore {
   allData: StadiumGeoJson | null;
   selectedData: SelectedData | undefined;

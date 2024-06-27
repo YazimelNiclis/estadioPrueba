@@ -9,6 +9,11 @@ import type {
 import { LngLatBounds } from "maplibre-gl";
 import { calculateAngle } from "../../utils/utils";
 
+/**
+ * @deprecated
+ */
+// deprecated component.
+
 interface FillColor {
   default: string;
   hover?: string;
