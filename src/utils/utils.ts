@@ -95,3 +95,6 @@ export const getSeatSize = ({
   return interpolatedSize;
 };
 
+export const generateRandomInteger = (max: number): number => {
+  return Math.floor(Math.random() * max);
+};

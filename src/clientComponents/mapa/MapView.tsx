@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Map from "react-map-gl/maplibre";
+import { LngLat } from "maplibre-gl";
 import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
 import { calculateAngle, getSeatSize } from "../../utils/utils";
 import { SelectedData, HoverData } from "@/utils/types/mapTypes";
@@ -9,6 +10,7 @@ import useMapStore from "@/app/store/mapStore";
 import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Layers from "./MapLayers";
+import { centroid } from "@turf/turf";
 import mapStyle from "../../../public/mapStyle.json";
 
 /* 
@@ -18,6 +20,7 @@ import mapStyle from "../../../public/mapStyle.json";
 function MapView() {
   const {
     allData,
+    selectedData,
     setSelectedData,
     hoveredData,
     setHoveredData,
@@ -89,8 +92,9 @@ function MapView() {
       const angle = calculateAngle(lngLat, centralPoint);
       mapRef.current?.rotateTo(angle, {
         duration: 1000,
+        // @ts-ignore
         center: [lngLat.lng, lngLat.lat],
-        zoom: 21.5,
+        zoom: 20.5,
         pitch: 60,
       });
     }
@@ -139,7 +143,7 @@ function MapView() {
         setLastClickedFeature(clickedFeatureId);
 
         handleMapRotation(lngLat, clickedFeatureId);
-        setSelectedData(feature);
+        // setSelectedData(feature);
 
         setHoveredFeature(null);
         // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
@@ -189,15 +193,18 @@ function MapView() {
         }
       }
     },
-    [selectedSeat]
+    [selectedSeat, setSelectedSeat]
   );
 
-  const handleSeatHover = React.useCallback((event: MapLayerMouseEvent) => {
-    const { features } = event;
-    const seatFeature = features?.find((f) => f.layer.id === "seats");
-    const hoveredSeatId = seatFeature?.properties?.id;
-    setHoveredSeat(hoveredSeatId || null);
-  }, []);
+  const handleSeatHover = React.useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { features } = event;
+      const seatFeature = features?.find((f) => f.layer.id === "seats");
+      const hoveredSeatId = seatFeature?.properties?.id;
+      setHoveredSeat(hoveredSeatId || null);
+    },
+    [setHoveredSeat]
+  );
 
 
   React.useEffect(() => {
@@ -219,6 +226,39 @@ function MapView() {
     // Limpiar event listener al desmontar componente
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  React.useEffect(() => {
+    //cargo los valores iniciales del mapa, para que funcione el reset
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    setInitialView({
+      center: map.getCenter(),
+      zoom: map.getZoom(),
+      pitch: map.getPitch(),
+      bearing: map.getBearing(),
+    });
+  }, [allData, setInitialView]);
+
+  React.useEffect(() => {
+    const zoomToFeature = (selectedFeature: SelectedData) => {
+      const feature = allData?.features.find(
+        (f) => f.properties.id === selectedFeature.id
+      );
+      if (feature) {
+        const centroidCoordinates = centroid(feature).geometry.coordinates;
+        const lngLat = new LngLat(
+          centroidCoordinates[0],
+          centroidCoordinates[1]
+        );
+        handleMapRotation(lngLat, selectedFeature.id.toString());
+      }
+    };
+
+    if (selectedData) {
+      zoomToFeature(selectedData);
+    }
+  }, [selectedData]);
 
   React.useEffect(() => {
     const newSeatSize = getSeatSize({ currentZoom: Number(hoveredData.zoom) });
