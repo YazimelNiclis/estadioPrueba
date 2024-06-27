@@ -8,6 +8,11 @@ import {
 
 /* 
   Zustand map store.
+  Con zustand puede haber mas de un store.
+*/
+/* 
+  La unica herramienta que se necesita es la funcion create de zustand. 
+  Se declara la store, incluyendo el valor (o estado) y las funciones que modifican al estado.
 */
 
 interface MapStore {

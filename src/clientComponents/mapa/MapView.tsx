@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Map from "react-map-gl/maplibre";
+import Map, { Popup } from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
 import { calculateAngle } from "../../utils/utils";
@@ -44,6 +44,12 @@ function MapView() {
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
+
+  const [popupInfo, setPopupInfo] = React.useState<{
+    seatId: string;
+    seatPrice?: number | undefined;
+    lngLat: [number, number];
+  } | null>(null);
 
   // Handler de hover de sectores
   const onHover = React.useCallback(
@@ -184,9 +190,22 @@ function MapView() {
 
   const handleSeatHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
-      const { features } = event;
+      const { features, lngLat } = event;
       const seatFeature = features?.find((f) => f.layer.id === "seats");
       const hoveredSeatId = seatFeature?.properties?.id;
+
+      if (hoveredSeatId && lngLat) {
+        setPopupInfo({
+          seatId: hoveredSeatId as string,
+          seatPrice: undefined,
+          lngLat: [lngLat.lng, lngLat.lat],
+        });
+      } else {
+        setPopupInfo(null);
+      }
+      console.log(features, "here feature");
+      console.log(lngLat, "ACAAAAA LONG LAT!!!!!!!");
+
       setHoveredSeat(hoveredSeatId || null);
     },
     [setHoveredSeat]
@@ -271,6 +290,19 @@ function MapView() {
         }}
       >
         <Layers allData={allData} filteredSeatData={filteredSeatData} />
+        {popupInfo && (
+          <Popup
+            longitude={popupInfo.lngLat[0]}
+            latitude={popupInfo.lngLat[1]}
+            anchor="top"
+            onClose={() => setPopupInfo(null)}
+          >
+            <div>
+              <p>Seat: {popupInfo.seatId}</p>
+              <p>Price: ${popupInfo.seatPrice}</p>
+            </div>
+          </Popup>
+        )}
       </Map>
     </div>
   );
