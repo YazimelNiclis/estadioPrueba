@@ -18,13 +18,6 @@ export type Point = {
   type: "Point";
   coordinates: number[];
 };
-export interface SeatProperties {
-  id: number;
-  place_id: number;
-  sector_cod: string;
-  row: number;
-  seat: number;
-}
 export interface SeatsGeoJson {
   type: "FeatureCollection";
   name: string;
@@ -35,6 +28,13 @@ export interface SeatsGeoJson {
     };
   };
   features: Seat[];
+}
+
+export interface popup {
+  seatId: string;
+  seatRow: string;
+  seatPrice: number | undefined;
+  lngLat: [number, number];
 }
 //Sector
 export interface HoverData {

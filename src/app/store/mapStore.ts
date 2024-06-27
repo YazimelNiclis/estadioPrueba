@@ -4,10 +4,16 @@ import {
   HoverData,
   SelectedData,
   StadiumGeoJson,
+  popup,
 } from "@/utils/types/mapTypes";
 
 /* 
   Zustand map store.
+  Con zustand puede haber mas de un store.
+*/
+/* 
+  La unica herramienta que se necesita es la funcion create de zustand. 
+  Se declara la store, incluyendo el valor (o estado) y las funciones que modifican al estado.
 */
 
 interface MapStore {
@@ -25,6 +31,7 @@ interface MapStore {
   hoveredSeat: string | null;
   selectedSeat: string[];
   seatSize: number | null;
+  popupInfo: popup | null;
   setAllData: (data: StadiumGeoJson) => void;
   setSelectedData: (data: SelectedData | undefined) => void;
   setHoveredData: (update: (prev: HoverData) => Partial<HoverData>) => void;
@@ -39,6 +46,7 @@ interface MapStore {
   setHoveredSeat: (seat: string | null) => void;
   setSelectedSeat: (seat: string[]) => void;
   setSeatSize: (size: number | null) => void;
+  setPopupInfo: (data: popup | null) => void;
 }
 
 const useMapStore = create<MapStore>((set) => ({
@@ -60,7 +68,8 @@ const useMapStore = create<MapStore>((set) => ({
   filteredSeatData: [],
   hoveredSeat: null,
   selectedSeat: [""],
-  seatSize:0,
+  seatSize: 0,
+  popupInfo: null,
   setAllData: (data) => set({ allData: data }),
   setSelectedData: (data) => set({ selectedData: data }),
   setHoveredData: (update) =>
@@ -81,6 +90,7 @@ const useMapStore = create<MapStore>((set) => ({
   setHoveredSeat: (seat) => set({ hoveredSeat: seat }),
   setSelectedSeat: (seat) => set({ selectedSeat: seat }),
   setSeatSize: (size) => set({ seatSize: size }),
+  setPopupInfo: (data) => set({ popupInfo: data }),
 }));
 
 export default useMapStore;

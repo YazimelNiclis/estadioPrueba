@@ -25,7 +25,11 @@ interface LayersProps {
   seatSize: number;
 }
 
-const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData,seatSize}) => {
+const Layers: React.FC<LayersProps> = ({
+  allData,
+  filteredSeatData,
+  seatSize,
+}) => {
   const { hoveredFeature, selectedFeature, hoveredSeat, selectedSeat } =
     useMapStore();
 
@@ -73,7 +77,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData,seatSize}) =>
         ],
       },
     };
-  }, [seatSize,hoveredSeat, selectedSeat]);
+  }, [seatSize, hoveredSeat, selectedSeat]);
 
   // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {
@@ -81,7 +85,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData,seatSize}) =>
     type: "symbol",
     source: "seats",
     layout: {
-      "text-field": ["get", "id"],
+      "text-field": ["get", "seat"],
       "text-size": seatSize,
       "text-anchor": "center",
       "text-allow-overlap": true,
@@ -93,22 +97,22 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData,seatSize}) =>
 
   // Codigo de sectores
   const symbolLayerStyles: SymbolLayerSpecification = {
-      id: "labels",
-      type: "symbol",
-      source: "data",
-      layout: {
-        "text-field": ["get", "codigo"],
-        "text-size": 10,
-        "text-anchor": "center",
-        "text-padding": 10,
-        "text-allow-overlap": false,
-      },
-      paint: {
-        "text-color": "#000000",
-        "text-halo-color": "#ffffff",
-        "text-halo-width": 6,
-      },
-    };
+    id: "labels",
+    type: "symbol",
+    source: "data",
+    layout: {
+      "text-field": ["get", "codigo"],
+      "text-size": 10,
+      "text-anchor": "center",
+      "text-padding": 10,
+      "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#000000",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 6,
+    },
+  };
 
   return (
     <>

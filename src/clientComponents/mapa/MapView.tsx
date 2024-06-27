@@ -12,6 +12,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import Layers from "./MapLayers";
 import { centroid } from "@turf/turf";
 import mapStyle from "../../../public/mapStyle.json";
+import SeatPricePopup from "./SeatPricePopup";
 
 /* 
   Mapa. Componente a cargo de renderizar el mapa y manejo de interacciones con el mismo.
@@ -45,11 +46,12 @@ function MapView() {
     seatSize,
     setSeatSize
     
+    popupInfo,
+    setPopupInfo,
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
 
-  // Handler de hover de sectores
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features } = event;
@@ -143,7 +145,9 @@ function MapView() {
         setLastClickedFeature(clickedFeatureId);
 
         handleMapRotation(lngLat, clickedFeatureId);
-        // setSelectedData(feature);
+        //    // setSelectedData(feature);
+
+        setSelectedSeat([]);
 
         setHoveredFeature(null);
         // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
@@ -160,6 +164,7 @@ function MapView() {
         setSelectedData(undefined);
         setFilteredSeatData([]);
         setHoveredFeature(null);
+        setSelectedSeat([""]);
       }
     },
     [lastClickedFeature, selectedFeature]
@@ -198,9 +203,22 @@ function MapView() {
 
   const handleSeatHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
-      const { features } = event;
+      const { features, lngLat } = event;
       const seatFeature = features?.find((f) => f.layer.id === "seats");
       const hoveredSeatId = seatFeature?.properties?.id;
+      const hoveredSeatNumber = seatFeature?.properties?.seat;
+      const hoveredSeatRow = seatFeature?.properties?.row;
+
+      if (hoveredSeatId && lngLat) {
+        setPopupInfo({
+          seatId: hoveredSeatNumber as string,
+          seatRow: hoveredSeatRow as string,
+          seatPrice: undefined,
+          lngLat: [lngLat.lng, lngLat.lat],
+        });
+      } else {
+        setPopupInfo(null);
+      }
       setHoveredSeat(hoveredSeatId || null);
     },
     [setHoveredSeat]
@@ -293,6 +311,9 @@ function MapView() {
         }}
       >
         <Layers allData={allData} filteredSeatData={filteredSeatData} seatSize={seatSize} />
+        {popupInfo && (
+          <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
+        )}
       </Map>
     </div>
   );
