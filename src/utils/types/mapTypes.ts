@@ -40,7 +40,7 @@ export interface SeatsGeoJson {
 export interface HoverData {
   lng: string;
   lat: string;
-  zoom: string;
+  zoom?: string;
   sector: string;
 }
 export interface SelectedData {

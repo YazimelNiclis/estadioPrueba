@@ -24,9 +24,10 @@ interface MapStore {
   filteredSeatData: any[];
   hoveredSeat: string | null;
   selectedSeat: string[];
+  seatSize: number | null;
   setAllData: (data: StadiumGeoJson) => void;
   setSelectedData: (data: SelectedData | undefined) => void;
-  setHoveredData: (data: HoverData) => void;
+  setHoveredData: (update: (prev: HoverData) => Partial<HoverData>) => void;
   setHoveredFeature: (feature: string | null) => void;
   setSelectedFeature: (feature: string | null) => void;
   setLastClickedFeature: (feature: string | null) => void;
@@ -37,6 +38,7 @@ interface MapStore {
   setFilteredSeatData: (data: any[]) => void;
   setHoveredSeat: (seat: string | null) => void;
   setSelectedSeat: (seat: string[]) => void;
+  setSeatSize: (size: number | null) => void;
 }
 
 const useMapStore = create<MapStore>((set) => ({
@@ -52,15 +54,22 @@ const useMapStore = create<MapStore>((set) => ({
   selectedFeature: null,
   lastClickedFeature: null,
   initialView: null,
-  zoom: 14.5,
+  zoom: 17.5,
   isMediumOrLarger: false,
   seatData: [],
   filteredSeatData: [],
   hoveredSeat: null,
   selectedSeat: [""],
+  seatSize:0,
   setAllData: (data) => set({ allData: data }),
   setSelectedData: (data) => set({ selectedData: data }),
-  setHoveredData: (data) => set({ hoveredData: data }),
+  setHoveredData: (update) =>
+    set((state) => ({
+      hoveredData: {
+        ...state.hoveredData,
+        ...update(state.hoveredData),
+      },
+    })),
   setHoveredFeature: (feature) => set({ hoveredFeature: feature }),
   setSelectedFeature: (feature) => set({ selectedFeature: feature }),
   setLastClickedFeature: (feature) => set({ lastClickedFeature: feature }),
@@ -71,6 +80,7 @@ const useMapStore = create<MapStore>((set) => ({
   setFilteredSeatData: (data) => set({ filteredSeatData: data }),
   setHoveredSeat: (seat) => set({ hoveredSeat: seat }),
   setSelectedSeat: (seat) => set({ selectedSeat: seat }),
+  setSeatSize: (size) => set({ seatSize: size }),
 }));
 
 export default useMapStore;
