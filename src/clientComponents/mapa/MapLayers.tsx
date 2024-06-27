@@ -79,8 +79,8 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
     type: "symbol",
     source: "seats",
     layout: {
-      "text-field": ["get", "id"],
-      "text-size": 6,
+      "text-field": ["get", "seat"],
+      "text-size": 5,
       "text-anchor": "center",
     },
     paint: {

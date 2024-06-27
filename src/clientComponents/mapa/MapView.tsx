@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Map, { Popup } from "react-map-gl/maplibre";
+import Map from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
 import { calculateAngle } from "../../utils/utils";
@@ -11,6 +11,7 @@ import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Layers from "./MapLayers";
 import { centroid } from "@turf/turf";
+import SeatPricePopup from "./SeatPricePopup";
 
 /* 
   Mapa. Componente a cargo de renderizar el mapa y manejo de interacciones con el mismo.
@@ -41,17 +42,12 @@ function MapView() {
     setZoom,
     isMediumOrLarger,
     setIsMediumOrLarger,
+    popupInfo,
+    setPopupInfo,
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
 
-  const [popupInfo, setPopupInfo] = React.useState<{
-    seatId: string;
-    seatPrice?: number | undefined;
-    lngLat: [number, number];
-  } | null>(null);
-
-  // Handler de hover de sectores
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features } = event;
@@ -137,7 +133,7 @@ function MapView() {
         setLastClickedFeature(clickedFeatureId);
 
         handleMapRotation(lngLat, clickedFeatureId);
-        // setSelectedData(feature);
+        //    // setSelectedData(feature);
 
         // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
         if (clickedFeatureCodigo) {
@@ -152,6 +148,7 @@ function MapView() {
         resetMap();
         setSelectedData(undefined);
         setFilteredSeatData([]);
+        setSelectedSeat([""]);
       }
     },
     [lastClickedFeature, selectedFeature]
@@ -193,19 +190,19 @@ function MapView() {
       const { features, lngLat } = event;
       const seatFeature = features?.find((f) => f.layer.id === "seats");
       const hoveredSeatId = seatFeature?.properties?.id;
+      const hoveredSeatNumber = seatFeature?.properties?.seat;
+      const hoveredSeatRow = seatFeature?.properties?.row;
 
       if (hoveredSeatId && lngLat) {
         setPopupInfo({
-          seatId: hoveredSeatId as string,
+          seatId: hoveredSeatNumber as string,
+          seatRow: hoveredSeatRow as string,
           seatPrice: undefined,
           lngLat: [lngLat.lng, lngLat.lat],
         });
       } else {
         setPopupInfo(null);
       }
-      console.log(features, "here feature");
-      console.log(lngLat, "ACAAAAA LONG LAT!!!!!!!");
-
       setHoveredSeat(hoveredSeatId || null);
     },
     [setHoveredSeat]
@@ -291,17 +288,7 @@ function MapView() {
       >
         <Layers allData={allData} filteredSeatData={filteredSeatData} />
         {popupInfo && (
-          <Popup
-            longitude={popupInfo.lngLat[0]}
-            latitude={popupInfo.lngLat[1]}
-            anchor="top"
-            onClose={() => setPopupInfo(null)}
-          >
-            <div>
-              <p>Seat: {popupInfo.seatId}</p>
-              <p>Price: ${popupInfo.seatPrice}</p>
-            </div>
-          </Popup>
+          <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
         )}
       </Map>
     </div>

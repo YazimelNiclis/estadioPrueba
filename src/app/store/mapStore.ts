@@ -4,6 +4,7 @@ import {
   HoverData,
   SelectedData,
   StadiumGeoJson,
+  popup,
 } from "@/utils/types/mapTypes";
 
 /* 
@@ -29,6 +30,7 @@ interface MapStore {
   filteredSeatData: any[];
   hoveredSeat: string | null;
   selectedSeat: string[];
+  popupInfo: popup | null;
   setAllData: (data: StadiumGeoJson) => void;
   setSelectedData: (data: SelectedData | undefined) => void;
   setHoveredData: (data: HoverData) => void;
@@ -42,6 +44,7 @@ interface MapStore {
   setFilteredSeatData: (data: any[]) => void;
   setHoveredSeat: (seat: string | null) => void;
   setSelectedSeat: (seat: string[]) => void;
+  setPopupInfo: (data: popup | null) => void;
 }
 
 const useMapStore = create<MapStore>((set) => ({
@@ -63,6 +66,7 @@ const useMapStore = create<MapStore>((set) => ({
   filteredSeatData: [],
   hoveredSeat: null,
   selectedSeat: [""],
+  popupInfo: null,
   setAllData: (data) => set({ allData: data }),
   setSelectedData: (data) => set({ selectedData: data }),
   setHoveredData: (data) => set({ hoveredData: data }),
@@ -76,6 +80,7 @@ const useMapStore = create<MapStore>((set) => ({
   setFilteredSeatData: (data) => set({ filteredSeatData: data }),
   setHoveredSeat: (seat) => set({ hoveredSeat: seat }),
   setSelectedSeat: (seat) => set({ selectedSeat: seat }),
+  setPopupInfo: (data) => set({ popupInfo: data }),
 }));
 
 export default useMapStore;

@@ -1,35 +1,33 @@
 "use client";
 
+import { popup } from "@/utils/types/mapTypes";
 import React from "react";
 import { Popup } from "react-map-gl/maplibre";
 
 interface SeatPricePopupProps {
-  seatId?: string;
-  seatPrice?: number | undefined;
-  lngLat: [number, number];
+  popupInfo: popup | null;
+  setPopupInfo: (data: popup | null) => void;
 }
 
 const SeatPricePopup: React.FC<SeatPricePopupProps> = ({
-  seatId,
-  seatPrice,
-  lngLat,
+  popupInfo,
+  setPopupInfo,
 }) => {
-  const [showPopup, setShowPopup] = React.useState<boolean>(true);
-
   return (
     <>
-      {showPopup && (
+      {popupInfo && (
         <Popup
-          longitude={lngLat[0]}
-          latitude={lngLat[1]}
-          closeButton={true}
-          closeOnClick={false}
-          onClose={() => setShowPopup(false)}
+          closeButton={false}
+          closeOnMove={true}
+          longitude={popupInfo.lngLat[0]}
+          latitude={popupInfo.lngLat[1]}
+          onClose={() => setPopupInfo(null)}
           anchor="top"
         >
           <div>
-            <p>Seat: {seatId}</p>
-            <p>Price: ${seatPrice}</p>
+            <p>Asiento: {popupInfo.seatId}</p>
+            <p>Fila: {popupInfo.seatRow}</p>
+            <p>Costo: ${popupInfo.seatPrice}</p>
           </div>
         </Popup>
       )}
