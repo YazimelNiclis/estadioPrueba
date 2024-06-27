@@ -60,3 +60,7 @@ export const calculateAngle = (point1: Coordinates, point2: Coordinates): number
   return (angle + 360) % 360;
 };
 
+
+export const generateRandomInteger = (max: number): number => {
+  return Math.floor(Math.random() * max);
+};
