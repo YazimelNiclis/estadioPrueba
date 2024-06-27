@@ -61,6 +61,40 @@ export const calculateAngle = (point1: Coordinates, point2: Coordinates): number
 };
 
 
+
+/**
+ * Interface for the parameters of the getSeatSize function.
+ */
+interface SeatSizeParams {
+  currentZoom: number;
+  minZoom?: number;
+  maxZoom?: number;
+  minSize?: number;
+  maxSize?: number;
+}
+
+/**
+ * Calculates the seat size based on the current zoom level.
+ *
+ * @param {SeatSizeParams} params - The parameters for calculating seat size.
+ * @returns {number} The calculated seat size.
+ */
+export const getSeatSize = ({
+  currentZoom,
+  minZoom = 20,
+  maxZoom = 22,
+  minSize = 3,
+  maxSize = 9,
+}: SeatSizeParams): number => {
+  if (currentZoom < minZoom) return 0; //minSize;
+  if (currentZoom > maxZoom) return maxSize;
+
+  const interpolatedSize =
+    minSize +
+    ((currentZoom - minZoom) / (maxZoom - minZoom)) * (maxSize - minSize);
+  return interpolatedSize;
+};
+
 export const generateRandomInteger = (max: number): number => {
   return Math.floor(Math.random() * max);
 };
