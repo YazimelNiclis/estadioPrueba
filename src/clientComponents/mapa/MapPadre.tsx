@@ -5,6 +5,7 @@ import MapView from "./MapView";
 import useMapStore from "@/app/store/mapStore";
 import { SeatsGeoJson, StadiumGeoJson } from "@/utils/types/mapTypes";
 import MapSidebar from "./MapSidebar";
+import MapDetails from "./MapDetails";
 interface MapPadreProps {
   data: StadiumGeoJson;
   seats: SeatsGeoJson;
@@ -21,7 +22,8 @@ const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
   return (
     <div className="w-full md:h-full screen-h grid grid-cols-1 md:grid-cols-5">
       <MapView />
-      <MapSidebar />
+      {/* <MapSidebar /> */}
+      <MapDetails />
     </div>
   );
 };

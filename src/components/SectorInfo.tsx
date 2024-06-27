@@ -41,7 +41,7 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
         }`}
         onClick={onClick}
       >
-        <div className="flex flex-col justify-center gap-1">
+        <div className="flex flex-col justify-center gap-1 text-left">
           <h2 className="text-lg font-semibold">{properties.nombre}</h2>
           <span className="text-sm text-[#495F76]">
             {isSoldOut

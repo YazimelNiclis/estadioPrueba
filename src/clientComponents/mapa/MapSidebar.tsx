@@ -7,10 +7,6 @@ import { Feature } from "@/utils/types/mapTypes";
 import { generateRandomInteger } from "@/utils/utils";
 import SectorInfo from "@/components/SectorInfo";
 
-/* 
-  Sidebar al lado del mapa.
-*/
-
 function MapSidebar() {
   const { allData } = useMapStore();
 
