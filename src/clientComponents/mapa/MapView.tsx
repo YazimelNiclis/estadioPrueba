@@ -5,7 +5,7 @@ import Map from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
 import { calculateAngle } from "../../utils/utils";
-import { SelectedData, HoverData } from "@/utils/types/mapTypes";
+import { HoverData, FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
 import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -137,7 +137,7 @@ function MapView() {
         setLastClickedFeature(null);
         setSelectedFeature(null);
         resetMap();
-        setSelectedData(undefined);
+        setSelectedData(null);
         setFilteredSeatData([]);
       }
     },
@@ -219,7 +219,7 @@ function MapView() {
   }, [mapRef.current]);
 
   React.useEffect(() => {
-    const zoomToFeature = (selectedFeature: SelectedData) => {
+    const zoomToFeature = (selectedFeature: FeatureProperties) => {
       const feature = allData?.features.find(
         (f) => f.properties.id === selectedFeature.id
       );

@@ -2,8 +2,8 @@ import { create } from "zustand";
 import {
   Seat,
   HoverData,
-  SelectedData,
   StadiumGeoJson,
+  FeatureProperties,
 } from "@/utils/types/mapTypes";
 
 /* 
@@ -12,7 +12,7 @@ import {
 
 interface MapStore {
   allData: StadiumGeoJson | null;
-  selectedData: SelectedData | undefined;
+  selectedData: FeatureProperties | null;
   hoveredData: HoverData;
   hoveredFeature: string | null;
   selectedFeature: string | null;
@@ -25,7 +25,7 @@ interface MapStore {
   hoveredSeat: string | null;
   selectedSeat: string[];
   setAllData: (data: StadiumGeoJson) => void;
-  setSelectedData: (data: SelectedData | undefined) => void;
+  setSelectedData: (data: FeatureProperties | null) => void;
   setHoveredData: (data: HoverData) => void;
   setHoveredFeature: (feature: string | null) => void;
   setSelectedFeature: (feature: string | null) => void;
@@ -41,7 +41,7 @@ interface MapStore {
 
 const useMapStore = create<MapStore>((set) => ({
   allData: null,
-  selectedData: undefined,
+  selectedData: null,
   hoveredData: {
     lat: "",
     lng: "",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Divider } from "@nextui-org/react";
-import { FeatureProperties, SelectedData } from "@/utils/types/mapTypes";
+import { FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
 import { currencyFormatter } from "@/utils/utils";
 
@@ -19,12 +19,7 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
 
   const onClick = () => {
     if (isSoldOut) return;
-
-    const selectedData = {
-      ...properties,
-      codigo: Number(properties.codigo),
-    } as SelectedData;
-    setSelectedData(selectedData);
+    setSelectedData(properties);
   };
 
   const isSoldOut = availableTickets === 0;
