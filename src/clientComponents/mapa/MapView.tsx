@@ -131,6 +131,14 @@ function MapView() {
       const clickedFeatureId = features && features[0]?.properties?.id;
       const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
 
+      // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
+      if (clickedFeatureCodigo) {
+        const filteredSeats = seatData.filter(
+          (seat) => seat.properties.sector_cod === clickedFeatureCodigo
+        );
+        setFilteredSeatData(filteredSeats);
+      }
+
       // Chequear si el mismo sector fue clickeado otra vez
       if (clickedFeatureId === selectedFeature) {
         return;
@@ -143,18 +151,11 @@ function MapView() {
         setLastClickedFeature(clickedFeatureId);
 
         handleMapRotation(lngLat, clickedFeatureId);
-        //    // setSelectedData(feature);
+        setSelectedData(feature);
 
         setSelectedSeat([]);
 
         setHoveredFeature(null);
-        // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
-        if (clickedFeatureCodigo) {
-          const filteredSeats = seatData.filter(
-            (seat) => seat.properties.sector_cod === clickedFeatureCodigo
-          );
-          setFilteredSeatData(filteredSeats);
-        }
       } else {
         setLastClickedFeature(null);
         setSelectedFeature(null);
@@ -165,7 +166,7 @@ function MapView() {
         setSelectedSeat([""]);
       }
     },
-    [lastClickedFeature, selectedFeature]
+    [lastClickedFeature, selectedFeature, selectedData, seatData]
   );
 
   const handleSeatClick = React.useCallback(
