@@ -10,6 +10,7 @@ import {
 } from "react-map-gl/maplibre";
 import useMapStore from "@/app/store/mapStore";
 import { StadiumGeoJson } from "@/utils/types/mapTypes";
+import { SymbolLayerSpecification } from "maplibre-gl";
 
 /* 
   Componente a cargo de la creacion de las capas/layers del mapa con sus correspondientes estilos.
@@ -21,9 +22,14 @@ import { StadiumGeoJson } from "@/utils/types/mapTypes";
 interface LayersProps {
   allData: StadiumGeoJson | null;
   filteredSeatData: any[];
+  seatSize: number;
 }
 
-const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
+const Layers: React.FC<LayersProps> = ({
+  allData,
+  filteredSeatData,
+  seatSize,
+}) => {
   const { hoveredFeature, selectedFeature, hoveredSeat, selectedSeat } =
     useMapStore();
 
@@ -56,7 +62,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
       type: "circle" as const,
       source: "seats",
       paint: {
-        "circle-radius": 8,
+        "circle-radius": seatSize,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hoveredSeat || ""],
@@ -71,7 +77,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
         ],
       },
     };
-  }, [hoveredSeat, selectedSeat]);
+  }, [seatSize, hoveredSeat, selectedSeat]);
 
   // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {
@@ -79,12 +85,32 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
     type: "symbol",
     source: "seats",
     layout: {
-      "text-field": ["get", "id"],
-      "text-size": 6,
+      "text-field": ["get", "seat"],
+      "text-size": seatSize,
       "text-anchor": "center",
+      "text-allow-overlap": true,
     },
     paint: {
       "text-color": "#000000",
+    },
+  };
+
+  // Codigo de sectores
+  const symbolLayerStyles: SymbolLayerSpecification = {
+    id: "labels",
+    type: "symbol",
+    source: "data",
+    layout: {
+      "text-field": ["get", "codigo"],
+      "text-size": 10,
+      "text-anchor": "center",
+      "text-padding": 10,
+      "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#000000",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 6,
     },
   };
 
@@ -93,6 +119,7 @@ const Layers: React.FC<LayersProps> = ({ allData, filteredSeatData }) => {
       {allData && (
         <Source id="data" type="geojson" data={allData}>
           <Layer {...getLayerStyles} />
+          <Layer {...symbolLayerStyles} />
         </Source>
       )}
       {filteredSeatData && filteredSeatData.length > 0 && (

@@ -4,13 +4,15 @@ import * as React from "react";
 import Map from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
-import { calculateAngle } from "../../utils/utils";
+import { calculateAngle, getSeatSize } from "../../utils/utils";
 import { HoverData, FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
 import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Layers from "./MapLayers";
 import { centroid } from "@turf/turf";
+import mapStyle from "../../../public/mapStyle.json";
+import SeatPricePopup from "./SeatPricePopup";
 
 /* 
   Mapa. Componente a cargo de renderizar el mapa y manejo de interacciones con el mismo.
@@ -41,11 +43,14 @@ function MapView() {
     setZoom,
     isMediumOrLarger,
     setIsMediumOrLarger,
+    seatSize,
+    setSeatSize,
+    popupInfo,
+    setPopupInfo,
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
 
-  // Handler de hover de sectores
   const onHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
       const { features } = event;
@@ -61,16 +66,23 @@ function MapView() {
       }
 
       const { lngLat } = event;
-      const newData: HoverData = {
+      const newData: Partial<HoverData> = {
         ...hoveredData,
         lat: lngLat.lat.toFixed(4),
         lng: lngLat.lng.toFixed(4),
         sector: features![0]?.properties?.nombre || "Ninguno",
       };
-      setHoveredData(newData);
+      setHoveredData(() => newData);
     },
     [hoveredData, hoveredFeature, selectedFeature]
   );
+
+  const handleZoom = (e) => {
+    setHoveredData((prev) => ({
+      ...prev,
+      zoom: e.viewState.zoom.toFixed(4),
+    }));
+  };
 
   const handleMapRotation = (
     lngLat: maplibregl.LngLat,
@@ -124,8 +136,11 @@ function MapView() {
         setLastClickedFeature(clickedFeatureId);
 
         handleMapRotation(lngLat, clickedFeatureId);
-        // setSelectedData(feature);
+        //    // setSelectedData(feature);
 
+        setSelectedSeat([]);
+
+        setHoveredFeature(null);
         // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
         if (clickedFeatureCodigo) {
           const filteredSeats = seatData.filter(
@@ -139,6 +154,8 @@ function MapView() {
         resetMap();
         setSelectedData(null);
         setFilteredSeatData([]);
+        setHoveredFeature(null);
+        setSelectedSeat([""]);
       }
     },
     [lastClickedFeature, selectedFeature]
@@ -177,9 +194,22 @@ function MapView() {
 
   const handleSeatHover = React.useCallback(
     (event: MapLayerMouseEvent) => {
-      const { features } = event;
+      const { features, lngLat } = event;
       const seatFeature = features?.find((f) => f.layer.id === "seats");
       const hoveredSeatId = seatFeature?.properties?.id;
+      const hoveredSeatNumber = seatFeature?.properties?.seat;
+      const hoveredSeatRow = seatFeature?.properties?.row;
+
+      if (hoveredSeatId && lngLat) {
+        setPopupInfo({
+          seatId: hoveredSeatNumber as string,
+          seatRow: hoveredSeatRow as string,
+          seatPrice: undefined,
+          lngLat: [lngLat.lng, lngLat.lat],
+        });
+      } else {
+        setPopupInfo(null);
+      }
       setHoveredSeat(hoveredSeatId || null);
     },
     [setHoveredSeat]
@@ -240,18 +270,25 @@ function MapView() {
     }
   }, [selectedData]);
 
+  React.useEffect(() => {
+    const newSeatSize = getSeatSize({ currentZoom: Number(hoveredData.zoom) });
+    setSeatSize(newSeatSize);
+  }, [hoveredData.zoom]);
+
   return (
     <div className="w-full md:col-span-3 h-full overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
       <Map
         attributionControl={false}
         ref={mapRef}
-        mapStyle="https://demotiles.maplibre.org/style.json"
+        minZoom={17}
+        maxZoom={23}
+        mapStyle={mapStyle}
         initialViewState={{
           latitude: centralPoint.lat,
           longitude: centralPoint.lng,
           zoom: zoom,
         }}
-        onZoom={(e) => e.viewState.zoom.toFixed(4)}
+        onZoom={handleZoom}
         maxBounds={bounds}
         interactiveLayerIds={["data", "seats"]}
         onMouseMove={(e) => {
@@ -265,7 +302,14 @@ function MapView() {
           handleSeatClick(e);
         }}
       >
-        <Layers allData={allData} filteredSeatData={filteredSeatData} />
+        <Layers
+          allData={allData}
+          filteredSeatData={filteredSeatData}
+          seatSize={seatSize}
+        />
+        {popupInfo && (
+          <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
+        )}
       </Map>
     </div>
   );
