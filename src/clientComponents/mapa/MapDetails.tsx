@@ -15,47 +15,46 @@ import useCounter from "@/hooks/useCounter";
 import useMapStore from "@/app/store/mapStore";
 import TicketCounter from "@/components/TicketCounter";
 import Subtotal from "@/components/Subtotal";
-import { FeatureProperties } from "@/utils/types/mapTypes";
 import SeatList from "@/components/SeatList";
 
 const MAX_TICKETS = 4;
-const featureProperties: FeatureProperties = {
-  codigo: "GNA",
-  desc: "GNA",
-  id: 6,
-  nombre: "Gradería norte A",
-  place_id: 1,
-};
-const availableTickets = 10;
-const price = 120000;
 
 const MapDetails: React.FC = () => {
   const { count: ticketCount, decrement, increment } = useCounter(0);
-  const { setSelectedData } = useMapStore();
+  const { selectedData, setSelectedData } = useMapStore();
 
   const onBackButtonClick = () => {
-    setSelectedData(undefined);
+    setSelectedData(null);
   };
-
-  // deberia  ser por fetch
-  const seats = [
-    { name: "Gradería norte A", details: "Fila N Butaca 3" },
-    { name: "Gradería norte A", details: "Fila N Butaca 4" },
-  ];
 
   const subtotalItems = useMemo(
     () => [
       {
-        name: "Gradería norte A",
+        name: selectedData?.featureProperties.nombre ?? "",
         details: `x${ticketCount} entradas`,
-        price: price,
+        price: selectedData?.price ?? 0,
         quantity: ticketCount,
       },
       { name: "Canje de socios", details: "", price: -100000, quantity: 1 },
       { name: "Cargo por servicio", details: "", price: 10000, quantity: 1 },
     ],
-    [ticketCount]
+    [ticketCount, selectedData]
   );
+
+  if (!selectedData) return null;
+
+  const seats = [
+    {
+      name: selectedData.featureProperties.nombre,
+      details: "Fila N Butaca 3",
+    },
+    {
+      name: selectedData.featureProperties.nombre,
+      details: "Fila N Butaca 4",
+    },
+  ];
+
+  const { availableTickets, featureProperties, price } = selectedData;
 
   return (
     <div className="px-6 py-4 w-full md:col-span-2 flex flex-col gap-3 max-h-[80vh] overflow-y-scroll">

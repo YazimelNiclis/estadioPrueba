@@ -2,8 +2,12 @@
 
 import * as React from "react";
 import Map from "react-map-gl/maplibre";
-import { LngLat } from "maplibre-gl";
-import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
+import { LngLat, StyleSpecification } from "maplibre-gl";
+import type {
+  MapLayerMouseEvent,
+  MapRef,
+  ViewStateChangeEvent,
+} from "react-map-gl/maplibre";
 import { calculateAngle, getSeatSize } from "../../utils/utils";
 import { HoverData, FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
@@ -77,7 +81,7 @@ function MapView() {
     [hoveredData, hoveredFeature, selectedFeature]
   );
 
-  const handleZoom = (e) => {
+  const handleZoom = (e: ViewStateChangeEvent) => {
     setHoveredData((prev) => ({
       ...prev,
       zoom: e.viewState.zoom.toFixed(4),
@@ -130,7 +134,6 @@ function MapView() {
       }
 
       if (features?.length) {
-        const feature = features[0]?.properties as SelectedData;
         // Actualizar estado de sector seleccionado
         setSelectedFeature(clickedFeatureId);
         setLastClickedFeature(clickedFeatureId);
@@ -264,7 +267,7 @@ function MapView() {
     };
 
     if (selectedData) {
-      zoomToFeature(selectedData);
+      zoomToFeature(selectedData.featureProperties);
     } else {
       resetMap();
     }
@@ -282,7 +285,7 @@ function MapView() {
         ref={mapRef}
         minZoom={17}
         maxZoom={23}
-        mapStyle={mapStyle}
+        mapStyle={mapStyle as StyleSpecification}
         initialViewState={{
           latitude: centralPoint.lat,
           longitude: centralPoint.lng,
@@ -305,7 +308,7 @@ function MapView() {
         <Layers
           allData={allData}
           filteredSeatData={filteredSeatData}
-          seatSize={seatSize}
+          seatSize={seatSize ?? 0}
         />
         {popupInfo && (
           <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />

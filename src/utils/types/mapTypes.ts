@@ -72,3 +72,9 @@ export interface StadiumGeoJson {
   };
   features: Feature[];
 }
+
+export interface SelectedFeatureProperties {
+  price: number;
+  availableTickets: number;
+  featureProperties: FeatureProperties;
+}

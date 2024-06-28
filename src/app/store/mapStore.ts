@@ -5,6 +5,7 @@ import {
   StadiumGeoJson,
   FeatureProperties,
   popup,
+  SelectedFeatureProperties,
 } from "@/utils/types/mapTypes";
 
 /* 
@@ -18,7 +19,7 @@ import {
 
 interface MapStore {
   allData: StadiumGeoJson | null;
-  selectedData: FeatureProperties | null;
+  selectedData: SelectedFeatureProperties | null;
   hoveredData: HoverData;
   hoveredFeature: string | null;
   selectedFeature: string | null;
@@ -33,7 +34,7 @@ interface MapStore {
   seatSize: number | null;
   popupInfo: popup | null;
   setAllData: (data: StadiumGeoJson) => void;
-  setSelectedData: (data: FeatureProperties | null) => void;
+  setSelectedData: (data: SelectedFeatureProperties | null) => void;
   setHoveredData: (update: (prev: HoverData) => Partial<HoverData>) => void;
   setHoveredFeature: (feature: string | null) => void;
   setSelectedFeature: (feature: string | null) => void;

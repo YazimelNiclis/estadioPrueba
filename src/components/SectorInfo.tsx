@@ -19,7 +19,14 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
 
   const onClick = () => {
     if (isSoldOut) return;
-    setSelectedData(properties);
+
+    const selectedFeatureProperties = {
+      price,
+      availableTickets,
+      featureProperties: properties,
+    };
+
+    setSelectedData(selectedFeatureProperties);
   };
 
   const isSoldOut = availableTickets === 0;
