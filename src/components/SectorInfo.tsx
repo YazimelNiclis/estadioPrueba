@@ -2,11 +2,7 @@ import React from "react";
 import { Divider } from "@nextui-org/react";
 import { FeatureProperties, SelectedData } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
-
-const currencyFormatter = new Intl.NumberFormat("es-PY", {
-  style: "currency",
-  currency: "PYG",
-});
+import { currencyFormatter } from "@/utils/utils";
 
 interface SectorInfoProps {
   properties: FeatureProperties;

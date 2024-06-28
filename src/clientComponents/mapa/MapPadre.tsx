@@ -12,7 +12,7 @@ interface MapPadreProps {
 }
 
 const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
-  const { setAllData, setSeatData } = useMapStore();
+  const { setAllData, setSeatData, selectedData } = useMapStore();
 
   useEffect(() => {
     setAllData(data);
@@ -22,8 +22,7 @@ const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
   return (
     <div className="w-full md:h-full screen-h grid grid-cols-1 md:grid-cols-5">
       <MapView />
-      {/* <MapSidebar /> */}
-      <MapDetails />
+      {selectedData ? <MapDetails /> : <MapSidebar />}
     </div>
   );
 };
