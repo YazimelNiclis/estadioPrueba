@@ -97,13 +97,6 @@ function MapView() {
         pitch: initialView.pitch,
         bearing: initialView.bearing,
       });
-    } else {
-      // Temporal fix
-      mapRef.current?.easeTo({
-        duration: 1000,
-        center: [-57.6573, -25.2921546],
-        zoom: zoom,
-      });
     }
   };
 
@@ -213,17 +206,17 @@ function MapView() {
   }, []);
 
   React.useEffect(() => {
-    //cargo los valores iniciales del mapa, para que funcione el reset
+    console.log("initial view from useEffect: " + JSON.stringify(initialView));
     const map = mapRef.current?.getMap();
-    if (!map) return;
+    if (!map || initialView) return;
 
     setInitialView({
-      center: map.getCenter(),
+      center: map.getCenter().toArray(),
       zoom: map.getZoom(),
       pitch: map.getPitch(),
       bearing: map.getBearing(),
     });
-  }, [allData, setInitialView]);
+  }, [mapRef.current]);
 
   React.useEffect(() => {
     const zoomToFeature = (selectedFeature: SelectedData) => {
@@ -242,6 +235,8 @@ function MapView() {
 
     if (selectedData) {
       zoomToFeature(selectedData);
+    } else {
+      resetMap();
     }
   }, [selectedData]);
 
