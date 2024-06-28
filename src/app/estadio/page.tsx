@@ -4,14 +4,14 @@ import MapHeader from "@/clientComponents/mapa/MapHeader";
 import MapPadre from "@/clientComponents/mapa/MapPadre";
 
 async function getMapData() {
-  const res = await fetch("http://localhost:3000/estadioJSON.geojson");
+  const res = await fetch("http://localhost:3000/sectores.geojson");
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
   return res.json();
 }
 async function getMapSeats() {
-  const res = await fetch("http://localhost:3000/asientos.geojson");
+  const res = await fetch("http://localhost:3000/asientos-2.geojson");
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
