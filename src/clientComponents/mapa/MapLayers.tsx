@@ -9,12 +9,7 @@ import {
   CircleLayer,
 } from "react-map-gl/maplibre";
 import useMapStore from "@/app/store/mapStore";
-import {
-  HoverData,
-  Seat,
-  SelectedData,
-  StadiumGeoJson,
-} from "@/utils/types/mapTypes";
+import { HoverData, Seat, StadiumGeoJson } from "@/utils/types/mapTypes";
 import { SymbolLayerSpecification } from "maplibre-gl";
 
 /* 
@@ -53,15 +48,14 @@ const Layers: React.FC<LayersProps> = ({ allData }) => {
   }, [hovered.feature, selected.feature]);
 
   // Asientos
-  const getSeatLayerStyles: CircleLayer = React.useMemo(
-    () => {
-      return {
-        id: "seats",
-        type: "circle" as const,
-        source: "seats",
-        paint: {
-          "circle-radius": 10, //seatData.size,
-          "circle-color": "#C2C3C7" /*  [
+  const getSeatLayerStyles = React.useMemo(() => {
+    return {
+      id: "seats",
+      type: "circle",
+      source: "seats",
+      paint: {
+        "circle-radius": 5, //seatData.size,
+        "circle-color": [
           "case",
           ["==", ["get", "id"], hovered.seat || ""],
           "#3288bd", // hover color
@@ -72,14 +66,10 @@ const Layers: React.FC<LayersProps> = ({ allData }) => {
           ],
           "#FF0000", // selected color
           "#C2C3C7", // default color
-        ], */,
-        },
-      };
-    },
-    [
-      /* seatData.size, hovered.seat, selected.seats */
-    ]
-  );
+        ],
+      },
+    };
+  }, [seatData.size, hovered.seat, selected.seats]);
 
   // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {
@@ -88,7 +78,7 @@ const Layers: React.FC<LayersProps> = ({ allData }) => {
     source: "seats",
     layout: {
       "text-field": ["get", "seat"],
-      "text-size": seatData.size,
+      "text-size": 5, //seatData.size,
       "text-anchor": "center",
       "text-allow-overlap": true,
     },

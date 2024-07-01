@@ -162,7 +162,7 @@ export const handleSectorClick = (
     handleMapRotation(mapRef, lngLat, clickedFeatureId, selected);
 
     setSelected({
-      data: feature,
+      //data: feature,
       seats: [],
     });
 
