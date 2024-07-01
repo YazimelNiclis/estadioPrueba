@@ -53,11 +53,13 @@ export const onHover = (
   };
   setHovered({ data: newData });
 };
-//TODO:Arreglar con estados nuevos
+//TODO:Arreglar
 export const handleZoom = (e: ViewStateChangeEvent) => {
-  setHoveredData((prev) => ({
-    ...prev,
-    zoom: e.viewState.zoom.toFixed(4),
+  setHovered((prev) => ({
+    data: {
+      ...prev.data,
+      zoom: e.viewState.zoom.toFixed(4),
+    },
   }));
 };
 
