@@ -9,7 +9,12 @@ import {
   CircleLayer,
 } from "react-map-gl/maplibre";
 import useMapStore from "@/app/store/mapStore";
-import { StadiumGeoJson } from "@/utils/types/mapTypes";
+import {
+  HoverData,
+  Seat,
+  SelectedData,
+  StadiumGeoJson,
+} from "@/utils/types/mapTypes";
 import { SymbolLayerSpecification } from "maplibre-gl";
 
 /* 
@@ -21,17 +26,10 @@ import { SymbolLayerSpecification } from "maplibre-gl";
 
 interface LayersProps {
   allData: StadiumGeoJson | null;
-  filteredSeatData: any[];
-  seatSize: number;
 }
 
-const Layers: React.FC<LayersProps> = ({
-  allData,
-  filteredSeatData,
-  seatSize,
-}) => {
-  const { selected, hovered } = useMapStore();
-
+const Layers: React.FC<LayersProps> = ({ allData }) => {
+  const { selected, hovered, seatData } = useMapStore();
   // Estadio
   const getLayerStyles = React.useMemo(() => {
     const baseStyle: FillLayer = {
@@ -55,14 +53,15 @@ const Layers: React.FC<LayersProps> = ({
   }, [hovered.feature, selected.feature]);
 
   // Asientos
-  const getSeatLayerStyles: CircleLayer = React.useMemo(() => {
-    return {
-      id: "seats",
-      type: "circle" as const,
-      source: "seats",
-      paint: {
-        "circle-radius": seatSize,
-        "circle-color": [
+  const getSeatLayerStyles: CircleLayer = React.useMemo(
+    () => {
+      return {
+        id: "seats",
+        type: "circle" as const,
+        source: "seats",
+        paint: {
+          "circle-radius": 10, //seatData.size,
+          "circle-color": "#C2C3C7" /*  [
           "case",
           ["==", ["get", "id"], hovered.seat || ""],
           "#3288bd", // hover color
@@ -73,10 +72,14 @@ const Layers: React.FC<LayersProps> = ({
           ],
           "#FF0000", // selected color
           "#C2C3C7", // default color
-        ],
-      },
-    };
-  }, [seatSize, hovered.seat, selected.seats]);
+        ], */,
+        },
+      };
+    },
+    [
+      /* seatData.size, hovered.seat, selected.seats */
+    ]
+  );
 
   // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {
@@ -85,7 +88,7 @@ const Layers: React.FC<LayersProps> = ({
     source: "seats",
     layout: {
       "text-field": ["get", "seat"],
-      "text-size": seatSize,
+      "text-size": seatData.size,
       "text-anchor": "center",
       "text-allow-overlap": true,
     },
@@ -121,11 +124,11 @@ const Layers: React.FC<LayersProps> = ({
           <Layer {...symbolLayerStyles} />
         </Source>
       )}
-      {filteredSeatData && filteredSeatData.length > 0 && (
+      {seatData.filtered && seatData.filtered.length > 0 && (
         <Source
           id="seats"
           type="geojson"
-          data={{ type: "FeatureCollection", features: filteredSeatData }}
+          data={{ type: "FeatureCollection", features: seatData.filtered }}
         >
           <Layer {...getSeatLayerStyles} />
           <Layer {...getSeatNumbersStyles} />

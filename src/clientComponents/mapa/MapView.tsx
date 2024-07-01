@@ -42,6 +42,12 @@ function MapView() {
   const mapRef = React.useRef<MapRef>(null);
 
   React.useEffect(() => {
+    console.log(selected, "NEW SELECTED STATE!");
+    //console.log(hovered, "HOVERED NEW STATE!!!!!!!!!");
+    console.log(seatData.filtered, "SEAT FILTERED DATA DATA DATA!!!!!");
+  }, [selected, seatData.filtered]);
+
+  React.useEffect(() => {
     // Chequear screen size
     const handleResize = () => {
       const mediumOrLarger = window.matchMedia("(min-width: 768px)").matches;
@@ -134,11 +140,7 @@ function MapView() {
           handleSeatClick(e, selected);
         }}
       >
-        <Layers
-          allData={allData}
-          filteredSeatData={seatData.filtered}
-          seatSize={seatData.size}
-        />
+        <Layers allData={allData} />
         {popupInfo && (
           <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
         )}

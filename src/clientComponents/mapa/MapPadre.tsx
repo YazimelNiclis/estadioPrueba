@@ -15,7 +15,7 @@ const MapPadre: React.FC<MapPadreProps> = ({ data, seats }) => {
 
   useEffect(() => {
     setAllData(data);
-    setSeatData(seats.features);
+    setSeatData({ allSeats: seats.features });
   }, [data, seats, setAllData, setSeatData]);
 
   return (
