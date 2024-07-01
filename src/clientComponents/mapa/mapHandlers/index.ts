@@ -95,7 +95,7 @@ export const resetMap = (
 };
 
 // Handler click sectores
-export const onClick = (
+export const handleSectorClick = (
   event: MapLayerMouseEvent,
   selectedFeature: string | null,
   lastClickedFeature: string | null,

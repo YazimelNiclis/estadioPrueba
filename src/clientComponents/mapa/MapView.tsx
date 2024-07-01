@@ -16,7 +16,7 @@ import SeatPricePopup from "./SeatPricePopup";
 import {
   onHover,
   handleMapRotation,
-  onClick,
+  handleSectorClick,
   handleSeatClick,
   handleSeatHover,
   handleZoom,
@@ -121,6 +121,7 @@ function MapView() {
         ref={mapRef}
         minZoom={17}
         maxZoom={23}
+        //@ts-ignore
         mapStyle={mapStyle}
         initialViewState={{
           latitude: centralPoint.lat,
@@ -137,7 +138,7 @@ function MapView() {
           handleSeatHover(e);
         }}
         onClick={(e) => {
-          onClick(
+          handleSectorClick(
             e,
             selectedFeature,
             lastClickedFeature,
