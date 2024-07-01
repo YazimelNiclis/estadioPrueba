@@ -22,7 +22,7 @@ import { SymbolLayerSpecification } from "maplibre-gl";
 interface LayersProps {
   allData: StadiumGeoJson | null;
   filteredSeatData: any[];
-  seatSize: number | null;
+  seatSize: number;
 }
 
 const Layers: React.FC<LayersProps> = ({
@@ -30,8 +30,7 @@ const Layers: React.FC<LayersProps> = ({
   filteredSeatData,
   seatSize,
 }) => {
-  const { hoveredFeature, selectedFeature, hoveredSeat, selectedSeat } =
-    useMapStore();
+  const { selected, hovered } = useMapStore();
 
   // Estadio
   const getLayerStyles = React.useMemo(() => {
@@ -43,9 +42,9 @@ const Layers: React.FC<LayersProps> = ({
         "fill-opacity": 0.5,
         "fill-color": [
           "case",
-          ["==", ["get", "id"], hoveredFeature || ""],
+          ["==", ["get", "id"], hovered.feature || ""],
           "#E6F2FF", // hover color
-          ["==", ["get", "id"], selectedFeature || ""],
+          ["==", ["get", "id"], selected.feature || ""],
           "#E6F2FF", // click color
           "#98CF8B", // default color
         ],
@@ -53,7 +52,7 @@ const Layers: React.FC<LayersProps> = ({
     };
 
     return baseStyle;
-  }, [hoveredFeature, selectedFeature]);
+  }, [hovered.feature, selected.feature]);
 
   // Asientos
   const getSeatLayerStyles: CircleLayer = React.useMemo(() => {
@@ -65,19 +64,19 @@ const Layers: React.FC<LayersProps> = ({
         "circle-radius": seatSize,
         "circle-color": [
           "case",
-          ["==", ["get", "id"], hoveredSeat || ""],
+          ["==", ["get", "id"], hovered.seat || ""],
           "#3288bd", // hover color
           [
             "in",
             ["get", "id"],
-            ["literal", selectedSeat.length ? selectedSeat : [""]],
+            ["literal", selected.seats.length ? selected.seats : [""]],
           ],
           "#FF0000", // selected color
           "#C2C3C7", // default color
         ],
       },
     };
-  }, [seatSize, hoveredSeat, selectedSeat]);
+  }, [seatSize, hovered.seat, selected.seats]);
 
   // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {

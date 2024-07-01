@@ -18,78 +18,88 @@ import {
 
 interface MapStore {
   allData: StadiumGeoJson | null;
-  selectedData: SelectedData | undefined;
-  hoveredData: HoverData;
-  hoveredFeature: string | null;
-  selectedFeature: string | null;
-  lastClickedFeature: string | null;
-  initialView: any;
-  zoom: number;
-  isMediumOrLarger: boolean;
-  seatData: Seat[];
-  filteredSeatData: any[];
-  hoveredSeat: string | null;
-  selectedSeat: string[];
-  seatSize: number | null;
+  seatData: {
+    allSeats: Seat[];
+    filtered: any[];
+    size: number;
+  };
+  selected: {
+    data: SelectedData | undefined;
+    feature: string | null;
+    lastClickedFeature: string | null;
+    seats: string[];
+  };
+  hovered: {
+    data: HoverData;
+    feature: string | null;
+    seat: string | null;
+  };
+  mapView: {
+    initialView: any;
+    zoom: number;
+    isMediumOrLarger: boolean;
+  };
   popupInfo: popup | null;
   setAllData: (data: StadiumGeoJson) => void;
-  setSelectedData: (data: SelectedData | undefined) => void;
-  setHoveredData: (update: (prev: HoverData) => Partial<HoverData>) => void;
-  setHoveredFeature: (feature: string | null) => void;
-  setSelectedFeature: (feature: string | null) => void;
-  setLastClickedFeature: (feature: string | null) => void;
-  setInitialView: (view: any) => void;
-  setZoom: (zoom: number) => void;
-  setIsMediumOrLarger: (value: boolean) => void;
-  setSeatData: (data: Seat[]) => void;
-  setFilteredSeatData: (data: any[]) => void;
-  setHoveredSeat: (seat: string | null) => void;
-  setSelectedSeat: (seat: string[]) => void;
-  setSeatSize: (size: number | null) => void;
+  setSeatData: (update: Partial<MapStore["seatData"]>) => void;
+  setSelected: (selected: Partial<MapStore["selected"]>) => void;
+  setHovered: (hovered: Partial<MapStore["hovered"]>) => void;
+  setMapView: (update: Partial<MapStore["mapView"]>) => void;
   setPopupInfo: (data: popup | null) => void;
 }
 
 const useMapStore = create<MapStore>((set) => ({
   allData: null,
-  selectedData: undefined,
-  hoveredData: {
-    lat: "",
-    lng: "",
-    sector: "Ninguno",
-    zoom: "",
+  seatData: {
+    allSeats: [],
+    filtered: [],
+    size: 0,
   },
-  hoveredFeature: null,
-  selectedFeature: null,
-  lastClickedFeature: null,
-  initialView: null,
-  zoom: 17.5,
-  isMediumOrLarger: false,
-  seatData: [],
-  filteredSeatData: [],
-  hoveredSeat: null,
-  selectedSeat: [""],
-  seatSize: 0,
+  selected: {
+    data: undefined,
+    feature: null,
+    lastClickedFeature: null,
+    seats: [""],
+  },
+  hovered: {
+    data: {
+      lat: "",
+      lng: "",
+      sector: "Ninguno",
+      zoom: "",
+    },
+    feature: null,
+    seat: null,
+  },
+  mapView: {
+    initialView: null,
+    zoom: 17.5,
+    isMediumOrLarger: false,
+  },
   popupInfo: null,
   setAllData: (data) => set({ allData: data }),
-  setSelectedData: (data) => set({ selectedData: data }),
-  setHoveredData: (update) =>
+  setSeatData: (update) =>
     set((state) => ({
-      hoveredData: {
-        ...state.hoveredData,
-        ...update(state.hoveredData),
+      seatData: { ...state.seatData, ...update },
+    })),
+  setSelected: (selected) =>
+    set((state) => ({
+      selected: {
+        ...state.selected,
+        ...selected,
       },
     })),
-  setHoveredFeature: (feature) => set({ hoveredFeature: feature }),
-  setSelectedFeature: (feature) => set({ selectedFeature: feature }),
-  setLastClickedFeature: (feature) => set({ lastClickedFeature: feature }),
-  setInitialView: (view) => set({ initialView: view }),
-  setZoom: (zoom) => set({ zoom }),
-  setIsMediumOrLarger: (value) => set({ isMediumOrLarger: value }),
-  setSeatData: (data) => set({ seatData: data }),
-  setFilteredSeatData: (data) => set({ filteredSeatData: data }),
-  setHoveredSeat: (seat) => set({ hoveredSeat: seat }),
-  setSelectedSeat: (seat) => set({ selectedSeat: seat }),
-  setSeatSize: (size) => set({ seatSize: size }),
+  setHovered: (hovered) =>
+    set((state) => ({
+      hovered: {
+        ...state.hovered,
+        ...hovered,
+      },
+    })),
+  setMapView: (update) =>
+    set((state) => ({
+      mapView: { ...state.mapView, ...update },
+    })),
   setPopupInfo: (data) => set({ popupInfo: data }),
 }));
 
