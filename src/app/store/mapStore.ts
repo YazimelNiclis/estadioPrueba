@@ -33,6 +33,7 @@ interface MapStore {
   selectedSeat: string[];
   seatSize: number | null;
   popupInfo: popup | null;
+  lastZoom : number;
   setAllData: (data: StadiumGeoJson) => void;
   setSelectedData: (data: SelectedFeatureProperties | null) => void;
   setHoveredData: (update: (prev: HoverData) => Partial<HoverData>) => void;
@@ -48,6 +49,7 @@ interface MapStore {
   setSelectedSeat: (seat: string[]) => void;
   setSeatSize: (size: number | null) => void;
   setPopupInfo: (data: popup | null) => void;
+  setLastZoom : (zoom:number) => void;
 }
 
 const useMapStore = create<MapStore>((set) => ({
@@ -71,6 +73,7 @@ const useMapStore = create<MapStore>((set) => ({
   selectedSeat: [""],
   seatSize: 0,
   popupInfo: null,
+  lastZoom:0,
   setAllData: (data) => set({ allData: data }),
   setSelectedData: (data) => set({ selectedData: data }),
   setHoveredData: (update) =>
@@ -92,6 +95,7 @@ const useMapStore = create<MapStore>((set) => ({
   setSelectedSeat: (seat) => set({ selectedSeat: seat }),
   setSeatSize: (size) => set({ seatSize: size }),
   setPopupInfo: (data) => set({ popupInfo: data }),
+  setLastZoom:(zoom) => set({ lastZoom: zoom }),
 }));
 
 export default useMapStore;

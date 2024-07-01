@@ -26,6 +26,7 @@ import {
   handleZoom,
   resetMap,
 } from "./mapHandlers";
+import { NavigationControl } from "react-map-gl";
 
 /* 
   Mapa. Componente a cargo de renderizar el mapa y manejo de interacciones con el mismo.
@@ -52,6 +53,7 @@ function MapView() {
     setSeatSize,
     popupInfo,
     setPopupInfo,
+    lastZoom,
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
@@ -125,7 +127,7 @@ function MapView() {
       <Map
         attributionControl={false}
         ref={mapRef}
-        minZoom={17}
+        minZoom={17.5}
         maxZoom={23}
         mapStyle={mapStyle as StyleSpecification}
         initialViewState={{
@@ -133,7 +135,7 @@ function MapView() {
           longitude: centralPoint.lng,
           zoom: zoom,
         }}
-        onZoom={handleZoom}
+        onZoom={(e) => handleZoom(e, mapRef,initialView, zoom, lastZoom)}
         maxBounds={bounds}
         interactiveLayerIds={["data", "seats"]}
         onMouseMove={(e) => {
@@ -163,6 +165,11 @@ function MapView() {
         {popupInfo && (
           <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
         )}
+       
+        {/* Navigation Control */}
+        <div style={{ position: 'absolute', right: 10, top: 10 }}>
+          <NavigationControl showCompass={false} />
+        </div>
       </Map>
     </div>
   );
