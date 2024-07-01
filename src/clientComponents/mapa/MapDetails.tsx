@@ -35,7 +35,12 @@ const MapDetails: React.FC = () => {
         price: selectedData?.price ?? 0,
         quantity: ticketCount,
       },
-      { name: "Canje de socios", details: "", price: -100000, quantity: 1 },
+      {
+        name: "Canje de socios",
+        details: "",
+        price: selectedData?.price ?? 0 * -0.3,
+        quantity: 0,
+      },
       { name: "Cargo por servicio", details: "", price: 10000, quantity: 1 },
     ],
     [ticketCount, selectedData]
