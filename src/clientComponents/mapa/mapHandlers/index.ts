@@ -26,7 +26,7 @@ export const onHover = (
     seat: string | null;
   },
   selected: {
-    data: SelectedData | undefined;
+    data: SelectedFeatureProperties | null;
     feature: string | null;
     lastClickedFeature: string | null;
     seats: string[];
@@ -113,7 +113,7 @@ export const resetMap = (
 export const handleSectorClick = (
   event: MapLayerMouseEvent,
   selected: {
-    data: SelectedData | undefined;
+    data: SelectedFeatureProperties | null;
     feature: string | null;
     lastClickedFeature: string | null;
     seats: string[];
@@ -185,7 +185,7 @@ export const handleSectorClick = (
 export const handleSeatClick = (
   event: MapLayerMouseEvent,
   selected: {
-    data: SelectedData | undefined;
+    data: SelectedFeatureProperties | null;
     feature: string | null;
     lastClickedFeature: string | null;
     seats: string[];
