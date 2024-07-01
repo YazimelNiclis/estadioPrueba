@@ -1,19 +1,26 @@
 import React from "react";
 import { Button, Divider } from "@nextui-org/react";
+import { Seat, SelectedFeatureProperties } from "@/utils/types/mapTypes";
 
 interface SeatListProps {
-  seats: { name: string; details: string }[];
+  seats: Seat[];
+  sector: SelectedFeatureProperties;
 }
 
-const SeatList: React.FC<SeatListProps> = ({ seats }) => {
+const SeatList: React.FC<SeatListProps> = ({ seats, sector }) => {
+  // tenemos cientos de asientos para renderizar... preguntar sobre diseño
+  const slicedSeats = seats.slice(0, 5);
+
   return (
     <div className="p-4">
-      {seats.map((seat, index) => (
+      {slicedSeats.map(({ properties }, index) => (
         <React.Fragment key={index}>
           <div className="flex justify-between items-center my-4">
             <div>
-              <h3 className="font-bold">{seat.name}</h3>
-              <span className="text-sm text-[#495F76]">{seat.details}</span>
+              <h3 className="font-bold">{sector.featureProperties.nombre}</h3>
+              <span className="text-sm text-[#495F76]">
+                Fila {properties.row} Butaca {properties.seat}
+              </span>
             </div>
             <div>
               <Button

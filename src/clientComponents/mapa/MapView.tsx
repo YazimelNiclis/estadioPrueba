@@ -239,7 +239,6 @@ function MapView() {
   }, []);
 
   React.useEffect(() => {
-    console.log("initial view from useEffect: " + JSON.stringify(initialView));
     const map = mapRef.current?.getMap();
     if (!map || initialView) return;
 

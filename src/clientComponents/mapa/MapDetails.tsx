@@ -21,7 +21,7 @@ const MAX_TICKETS = 4;
 
 const MapDetails: React.FC = () => {
   const { count: ticketCount, decrement, increment } = useCounter(0);
-  const { selectedData, setSelectedData } = useMapStore();
+  const { selectedData, setSelectedData, filteredSeatData } = useMapStore();
 
   const onBackButtonClick = () => {
     setSelectedData(null);
@@ -42,17 +42,6 @@ const MapDetails: React.FC = () => {
   );
 
   if (!selectedData) return null;
-
-  const seats = [
-    {
-      name: selectedData.featureProperties.nombre,
-      details: "Fila N Butaca 3",
-    },
-    {
-      name: selectedData.featureProperties.nombre,
-      details: "Fila N Butaca 4",
-    },
-  ];
 
   const { availableTickets, featureProperties, price } = selectedData;
 
@@ -83,7 +72,7 @@ const MapDetails: React.FC = () => {
         Este evento sólo permite compra de máximo {MAX_TICKETS} entradas por
         persona
       </span>
-      <SeatList seats={seats} />
+      <SeatList seats={filteredSeatData} sector={selectedData} />
       <Accordion>
         <AccordionItem
           classNames={{

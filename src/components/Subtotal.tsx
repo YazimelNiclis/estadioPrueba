@@ -34,7 +34,7 @@ const Subtotal: React.FC<SubtotalProps> = ({ items }) => {
             </div>
             <div className="text-right">
               <h3 className="font-bold">
-                {currencyFormatter.format(item.price)}
+                {currencyFormatter.format(item.price * item.quantity)}
               </h3>
             </div>
           </div>

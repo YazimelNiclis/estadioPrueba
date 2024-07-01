@@ -12,7 +12,7 @@ function MapSidebar() {
 
   const sectorData = useMemo(() => {
     return allData?.features?.map(({ properties }: Feature) => {
-      const availableTickets = generateRandomInteger(3);
+      const availableTickets = generateRandomInteger(10);
       const price = (generateRandomInteger(10) + 1) * 10000;
 
       return { properties, availableTickets, price };
