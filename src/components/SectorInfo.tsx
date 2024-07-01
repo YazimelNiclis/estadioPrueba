@@ -1,12 +1,8 @@
 import React from "react";
 import { Divider } from "@nextui-org/react";
-import { FeatureProperties, SelectedData } from "@/utils/types/mapTypes";
+import { FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
-
-const currencyFormatter = new Intl.NumberFormat("es-PY", {
-  style: "currency",
-  currency: "PYG",
-});
+import { currencyFormatter } from "@/utils/utils";
 
 interface SectorInfoProps {
   properties: FeatureProperties;
@@ -24,11 +20,13 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
   const onClick = () => {
     if (isSoldOut) return;
 
-    const selectedData = {
-      ...properties,
-      codigo: Number(properties.codigo),
-    } as SelectedData;
-    setSelectedData(selectedData);
+    const selectedFeatureProperties = {
+      price,
+      availableTickets,
+      featureProperties: properties,
+    };
+
+    setSelectedData(selectedFeatureProperties);
   };
 
   const isSoldOut = availableTickets === 0;
@@ -41,7 +39,7 @@ const SectorInfo: React.FC<SectorInfoProps> = ({
         }`}
         onClick={onClick}
       >
-        <div className="flex flex-col justify-center gap-1">
+        <div className="flex flex-col justify-center gap-1 text-left">
           <h2 className="text-lg font-semibold">{properties.nombre}</h2>
           <span className="text-sm text-[#495F76]">
             {isSoldOut

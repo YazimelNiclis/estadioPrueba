@@ -2,10 +2,14 @@
 
 import * as React from "react";
 import Map from "react-map-gl/maplibre";
-import { LngLat } from "maplibre-gl";
-import type { MapRef } from "react-map-gl/maplibre";
-import { getSeatSize } from "../../utils/utils";
-import { SelectedData } from "@/utils/types/mapTypes";
+import { LngLat, StyleSpecification } from "maplibre-gl";
+import type {
+  MapLayerMouseEvent,
+  MapRef,
+  ViewStateChangeEvent,
+} from "react-map-gl/maplibre";
+import { calculateAngle, getSeatSize } from "../../utils/utils";
+import { HoverData, FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
 import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -20,6 +24,7 @@ import {
   handleSeatClick,
   handleSeatHover,
   handleZoom,
+  resetMap,
 } from "./mapHandlers";
 
 /* 
@@ -72,20 +77,19 @@ function MapView() {
   }, []);
 
   React.useEffect(() => {
-    //cargo los valores iniciales del mapa, para que funcione el reset
     const map = mapRef.current?.getMap();
-    if (!map) return;
+    if (!map || initialView) return;
 
     setInitialView({
-      center: map.getCenter(),
+      center: map.getCenter().toArray(),
       zoom: map.getZoom(),
       pitch: map.getPitch(),
       bearing: map.getBearing(),
     });
-  }, [allData, setInitialView]);
+  }, [mapRef.current]);
 
   React.useEffect(() => {
-    const zoomToFeature = (selectedFeature: SelectedData) => {
+    const zoomToFeature = (selectedFeature: FeatureProperties) => {
       const feature = allData?.features.find(
         (f) => f.properties.id === selectedFeature.id
       );
@@ -105,7 +109,9 @@ function MapView() {
     };
 
     if (selectedData) {
-      zoomToFeature(selectedData);
+      zoomToFeature(selectedData.featureProperties);
+    } else {
+      resetMap(mapRef, initialView, zoom);
     }
   }, [selectedData]);
 
@@ -121,8 +127,7 @@ function MapView() {
         ref={mapRef}
         minZoom={17}
         maxZoom={23}
-        //@ts-ignore
-        mapStyle={mapStyle}
+        mapStyle={mapStyle as StyleSpecification}
         initialViewState={{
           latitude: centralPoint.lat,
           longitude: centralPoint.lng,
@@ -153,7 +158,7 @@ function MapView() {
         <Layers
           allData={allData}
           filteredSeatData={filteredSeatData}
-          seatSize={seatSize}
+          seatSize={seatSize ?? 0}
         />
         {popupInfo && (
           <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />

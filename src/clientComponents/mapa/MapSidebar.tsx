@@ -7,16 +7,12 @@ import { Feature } from "@/utils/types/mapTypes";
 import { generateRandomInteger } from "@/utils/utils";
 import SectorInfo from "@/components/SectorInfo";
 
-/* 
-  Sidebar al lado del mapa.
-*/
-
 function MapSidebar() {
   const { allData } = useMapStore();
 
   const sectorData = useMemo(() => {
     return allData?.features?.map(({ properties }: Feature) => {
-      const availableTickets = generateRandomInteger(3);
+      const availableTickets = generateRandomInteger(10);
       const price = (generateRandomInteger(10) + 1) * 10000;
 
       return { properties, availableTickets, price };

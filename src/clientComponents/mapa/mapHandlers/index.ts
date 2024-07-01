@@ -1,7 +1,11 @@
-import { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
+import {
+  MapLayerMouseEvent,
+  MapRef,
+  ViewStateChangeEvent,
+} from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import { calculateAngle } from "@/utils/utils";
-import { HoverData, SelectedData } from "@/utils/types/mapTypes";
+import { HoverData, SelectedFeatureProperties } from "@/utils/types/mapTypes";
 import { centralPoint } from "@/constants/mapConstants";
 import useMapStore from "@/app/store/mapStore";
 
@@ -46,7 +50,7 @@ export const onHover = (
   setHoveredData(() => newData);
 };
 
-export const handleZoom = (e) => {
+export const handleZoom = (e: ViewStateChangeEvent) => {
   setHoveredData((prev) => ({
     ...prev,
     zoom: e.viewState.zoom.toFixed(4),
@@ -127,13 +131,10 @@ export const handleSectorClick = (
   }
 
   if (features?.length) {
-    const feature = features[0]?.properties as SelectedData;
     // Actualizar estado de sector seleccionado
     setSelectedFeature(clickedFeatureId);
     setLastClickedFeature(clickedFeatureId);
-
     handleMapRotation(mapRef, lngLat, clickedFeatureId, lastClickedFeature);
-    setSelectedData(feature);
 
     setSelectedSeat([]);
 
@@ -142,7 +143,7 @@ export const handleSectorClick = (
     setLastClickedFeature(null);
     setSelectedFeature(null);
     resetMap(mapRef, initialView, zoom);
-    setSelectedData(undefined);
+    setSelectedData(null);
     setFilteredSeatData([]);
     setHoveredFeature(null);
     setSelectedSeat([""]);
