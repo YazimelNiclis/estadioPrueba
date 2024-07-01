@@ -9,7 +9,7 @@ import {
   CircleLayer,
 } from "react-map-gl/maplibre";
 import useMapStore from "@/app/store/mapStore";
-import { StadiumGeoJson } from "@/utils/types/mapTypes";
+import { HoverData, Seat, StadiumGeoJson } from "@/utils/types/mapTypes";
 import { SymbolLayerSpecification } from "maplibre-gl";
 
 /* 
@@ -21,18 +21,10 @@ import { SymbolLayerSpecification } from "maplibre-gl";
 
 interface LayersProps {
   allData: StadiumGeoJson | null;
-  filteredSeatData: any[];
-  seatSize: number | null;
 }
 
-const Layers: React.FC<LayersProps> = ({
-  allData,
-  filteredSeatData,
-  seatSize,
-}) => {
-  const { hoveredFeature, selectedFeature, hoveredSeat, selectedSeat } =
-    useMapStore();
-
+const Layers: React.FC<LayersProps> = ({ allData }) => {
+  const { selected, hovered, seatData } = useMapStore();
   // Estadio
   const getLayerStyles = React.useMemo(() => {
     const baseStyle: FillLayer = {
@@ -43,9 +35,9 @@ const Layers: React.FC<LayersProps> = ({
         "fill-opacity": 0.5,
         "fill-color": [
           "case",
-          ["==", ["get", "id"], hoveredFeature || ""],
+          ["==", ["get", "id"], hovered.feature || ""],
           "#E6F2FF", // hover color
-          ["==", ["get", "id"], selectedFeature || ""],
+          ["==", ["get", "id"], selected.feature || ""],
           "#E6F2FF", // click color
           "#98CF8B", // default color
         ],
@@ -53,31 +45,31 @@ const Layers: React.FC<LayersProps> = ({
     };
 
     return baseStyle;
-  }, [hoveredFeature, selectedFeature]);
+  }, [hovered.feature, selected.feature]);
 
   // Asientos
-  const getSeatLayerStyles: CircleLayer = React.useMemo(() => {
+  const getSeatLayerStyles = React.useMemo(() => {
     return {
       id: "seats",
-      type: "circle" as const,
+      type: "circle",
       source: "seats",
       paint: {
-        "circle-radius": seatSize,
+        "circle-radius": 5, //seatData.size,
         "circle-color": [
           "case",
-          ["==", ["get", "id"], hoveredSeat || ""],
+          ["==", ["get", "id"], hovered.seat || ""],
           "#3288bd", // hover color
           [
             "in",
             ["get", "id"],
-            ["literal", selectedSeat.length ? selectedSeat : [""]],
+            ["literal", selected.seats.length ? selected.seats : [""]],
           ],
           "#FF0000", // selected color
           "#C2C3C7", // default color
         ],
       },
     };
-  }, [seatSize, hoveredSeat, selectedSeat]);
+  }, [seatData.size, hovered.seat, selected.seats]);
 
   // Numero de asientos
   const getSeatNumbersStyles: SymbolLayer = {
@@ -86,7 +78,7 @@ const Layers: React.FC<LayersProps> = ({
     source: "seats",
     layout: {
       "text-field": ["get", "seat"],
-      "text-size": seatSize,
+      "text-size": 5, //seatData.size,
       "text-anchor": "center",
       "text-allow-overlap": true,
     },
@@ -122,11 +114,11 @@ const Layers: React.FC<LayersProps> = ({
           <Layer {...symbolLayerStyles} />
         </Source>
       )}
-      {filteredSeatData && filteredSeatData.length > 0 && (
+      {seatData.filtered && seatData.filtered.length > 0 && (
         <Source
           id="seats"
           type="geojson"
-          data={{ type: "FeatureCollection", features: filteredSeatData }}
+          data={{ type: "FeatureCollection", features: seatData.filtered }}
         >
           <Layer {...getSeatLayerStyles} />
           <Layer {...getSeatNumbersStyles} />

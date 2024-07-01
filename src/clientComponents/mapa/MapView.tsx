@@ -34,22 +34,12 @@ import {
 function MapView() {
   const {
     allData,
-    selectedData,
-    hoveredData,
-    hoveredFeature,
-    selectedFeature,
-    lastClickedFeature,
-    initialView,
-    setInitialView,
+    selected,
+    hovered,
+    mapView,
+    setMapView,
     seatData,
-    filteredSeatData,
-    selectedSeat,
-    zoom,
-    setZoom,
-    isMediumOrLarger,
-    setIsMediumOrLarger,
-    seatSize,
-    setSeatSize,
+    setSeatData,
     popupInfo,
     setPopupInfo,
   } = useMapStore();
@@ -57,15 +47,21 @@ function MapView() {
   const mapRef = React.useRef<MapRef>(null);
 
   React.useEffect(() => {
+    console.log(selected, "NEW SELECTED STATE!");
+    //console.log(hovered, "HOVERED NEW STATE!!!!!!!!!");
+    console.log(seatData.filtered, "SEAT FILTERED DATA DATA DATA!!!!!");
+  }, [selected, seatData.filtered]);
+
+  React.useEffect(() => {
     // Chequear screen size
     const handleResize = () => {
       const mediumOrLarger = window.matchMedia("(min-width: 768px)").matches;
-      setIsMediumOrLarger(mediumOrLarger);
+      setMapView({ isMediumOrLarger: mediumOrLarger });
 
-      if (isMediumOrLarger) {
-        setZoom(16.6);
+      if (mapView.isMediumOrLarger) {
+        setMapView({ zoom: 16.6 });
       } else {
-        setZoom(8.5);
+        setMapView({ zoom: 8.5 });
       }
     };
     // Setear zoom inicial basado en original screen size
@@ -78,13 +74,15 @@ function MapView() {
 
   React.useEffect(() => {
     const map = mapRef.current?.getMap();
-    if (!map || initialView) return;
+    if (!map || mapView.initialView) return;
 
-    setInitialView({
-      center: map.getCenter().toArray(),
-      zoom: map.getZoom(),
-      pitch: map.getPitch(),
-      bearing: map.getBearing(),
+    setMapView({
+      initialView: {
+        center: map.getCenter().toArray(),
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+      },
     });
   }, [mapRef.current]);
 
@@ -103,22 +101,22 @@ function MapView() {
           mapRef,
           lngLat,
           selectedFeature.id.toString(),
-          lastClickedFeature
+          selected
         );
       }
     };
 
-    if (selectedData) {
-      zoomToFeature(selectedData.featureProperties);
+    if (selected.data) {
+      zoomToFeature(selected.data.featureProperties);
     } else {
-      resetMap(mapRef, initialView, zoom);
+      resetMap(mapRef, mapView.initialView, mapView.zoom);
     }
-  }, [selectedData]);
+  }, [selected.data, selected]);
 
   React.useEffect(() => {
-    const newSeatSize = getSeatSize({ currentZoom: Number(hoveredData.zoom) });
-    setSeatSize(newSeatSize);
-  }, [hoveredData.zoom]);
+    const newSeatSize = getSeatSize({ currentZoom: Number(hovered.data.zoom) });
+    setSeatData({ size: newSeatSize });
+  }, [hovered.data.zoom]);
 
   return (
     <div className="w-full md:col-span-3 h-full overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
@@ -131,35 +129,23 @@ function MapView() {
         initialViewState={{
           latitude: centralPoint.lat,
           longitude: centralPoint.lng,
-          zoom: zoom,
+          zoom: mapView.zoom,
         }}
         onZoom={handleZoom}
         maxBounds={bounds}
         interactiveLayerIds={["data", "seats"]}
         onMouseMove={(e) => {
-          if (!selectedFeature) {
-            onHover(e, hoveredFeature, selectedFeature, hoveredData);
+          if (!selected.feature) {
+            onHover(e, hovered, selected);
           }
           handleSeatHover(e);
         }}
         onClick={(e) => {
-          handleSectorClick(
-            e,
-            selectedFeature,
-            lastClickedFeature,
-            seatData,
-            mapRef,
-            initialView,
-            zoom
-          );
-          handleSeatClick(e, selectedSeat);
+          handleSectorClick(e, selected, seatData, mapRef, mapView);
+          handleSeatClick(e, selected);
         }}
       >
-        <Layers
-          allData={allData}
-          filteredSeatData={filteredSeatData}
-          seatSize={seatSize ?? 0}
-        />
+        <Layers allData={allData} />
         {popupInfo && (
           <SeatPricePopup popupInfo={popupInfo} setPopupInfo={setPopupInfo} />
         )}

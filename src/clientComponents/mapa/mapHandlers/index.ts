@@ -5,55 +5,61 @@ import {
 } from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import { calculateAngle } from "@/utils/utils";
-import { HoverData, SelectedFeatureProperties } from "@/utils/types/mapTypes";
+import {
+  HoverData,
+  Seat,
+  SelectedFeatureProperties,
+} from "@/utils/types/mapTypes";
 import { centralPoint } from "@/constants/mapConstants";
 import useMapStore from "@/app/store/mapStore";
+import { feature } from "@turf/turf";
 
-const {
-  setSelectedData,
-  setHoveredData,
-  setHoveredFeature,
-  setSelectedFeature,
-  setLastClickedFeature,
-  setFilteredSeatData,
-  setSelectedSeat,
-  setPopupInfo,
-  setHoveredSeat,
-} = useMapStore.getState();
+const { setSelected, setHovered, setSeatData, setPopupInfo } =
+  useMapStore.getState();
 
 // Handler hover sectores
 export const onHover = (
   event: MapLayerMouseEvent,
-  hoveredFeature: string | null,
-  selectedFeature: string | null,
-  hoveredData: HoverData
+  hovered: {
+    data: HoverData;
+    feature: string | null;
+    seat: string | null;
+  },
+  selected: {
+    data: SelectedFeatureProperties | null;
+    feature: string | null;
+    lastClickedFeature: string | null;
+    seats: string[];
+  }
 ) => {
   const { features } = event;
   const hoveredFeatureId = features && features[0]?.properties?.id;
 
-  if (hoveredFeatureId == hoveredFeature) {
+  if (hoveredFeatureId == hovered.feature) {
     return;
   }
-  if (selectedFeature && hoveredFeatureId === selectedFeature) {
-    setHoveredFeature(null);
+  if (selected.feature && hoveredFeatureId === selected.feature) {
+    setHovered({ feature: null });
   } else {
-    setHoveredFeature(hoveredFeatureId || null);
+    setHovered({ feature: hoveredFeatureId || null });
   }
 
   const { lngLat } = event;
-  const newData: Partial<HoverData> = {
-    ...hoveredData,
+  const newData: HoverData = {
+    ...hovered.data,
     lat: lngLat.lat.toFixed(4),
     lng: lngLat.lng.toFixed(4),
     sector: features![0]?.properties?.nombre || "Ninguno",
   };
-  setHoveredData(() => newData);
+  setHovered({ data: newData });
 };
-
+//TODO:Arreglar
 export const handleZoom = (e: ViewStateChangeEvent) => {
-  setHoveredData((prev) => ({
-    ...prev,
-    zoom: e.viewState.zoom.toFixed(4),
+  setHovered((prev) => ({
+    data: {
+      ...prev.data,
+      zoom: e.viewState.zoom.toFixed(4),
+    },
   }));
 };
 
@@ -61,9 +67,14 @@ export const handleMapRotation = (
   mapRef: React.RefObject<MapRef>,
   lngLat: LngLat,
   clickedFeatureId: string | null,
-  lastClickedFeature: string | null
+  selected: {
+    data: SelectedData | undefined;
+    feature: string | null;
+    lastClickedFeature: string | null;
+    seats: string[];
+  }
 ) => {
-  if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
+  if (clickedFeatureId && clickedFeatureId !== selected.lastClickedFeature) {
     const angle = calculateAngle(lngLat, centralPoint);
     mapRef.current?.rotateTo(angle, {
       duration: 1000,
@@ -101,12 +112,23 @@ export const resetMap = (
 // Handler click sectores
 export const handleSectorClick = (
   event: MapLayerMouseEvent,
-  selectedFeature: string | null,
-  lastClickedFeature: string | null,
-  seatData: any[],
+  selected: {
+    data: SelectedFeatureProperties | null;
+    feature: string | null;
+    lastClickedFeature: string | null;
+    seats: string[];
+  },
+  seatData: {
+    allSeats: Seat[];
+    filtered: any[];
+    size: number;
+  },
   mapRef: React.RefObject<MapRef>,
-  initialView: any,
-  zoom: number
+  mapView: {
+    initialView: any;
+    zoom: number;
+    isMediumOrLarger: boolean;
+  }
 ) => {
   const { features, lngLat } = event;
 
@@ -119,63 +141,78 @@ export const handleSectorClick = (
 
   // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
   if (clickedFeatureCodigo) {
-    const filteredSeats = seatData.filter(
+    const filteredSeats = seatData.allSeats.filter(
       (seat) => seat.properties.sector_cod === clickedFeatureCodigo
     );
-    setFilteredSeatData(filteredSeats);
+    setSeatData({ filtered: filteredSeats });
   }
 
   // Chequear si el mismo sector fue clickeado otra vez
-  if (clickedFeatureId === selectedFeature) {
+  if (clickedFeatureId === selected.feature) {
     return;
   }
 
   if (features?.length) {
     // Actualizar estado de sector seleccionado
-    setSelectedFeature(clickedFeatureId);
-    setLastClickedFeature(clickedFeatureId);
-    handleMapRotation(mapRef, lngLat, clickedFeatureId, lastClickedFeature);
+    setSelected({
+      feature: clickedFeatureId,
+      lastClickedFeature: clickedFeatureId,
+    });
 
-    setSelectedSeat([]);
+    handleMapRotation(mapRef, lngLat, clickedFeatureId, selected);
 
-    setHoveredFeature(null);
+    setSelected({
+      //data: feature,
+      seats: [],
+    });
+
+    setHovered({ feature: null });
   } else {
-    setLastClickedFeature(null);
-    setSelectedFeature(null);
-    resetMap(mapRef, initialView, zoom);
-    setSelectedData(null);
-    setFilteredSeatData([]);
-    setHoveredFeature(null);
-    setSelectedSeat([""]);
+    setSelected({
+      lastClickedFeature: null,
+      feature: null,
+    });
+    resetMap(mapRef, mapView.initialView, mapView.zoom);
+    setSelected({
+      data: undefined,
+      seats: [""],
+    });
+    setSeatData({ filtered: [] });
+    setHovered({ feature: null });
   }
 };
 
 export const handleSeatClick = (
   event: MapLayerMouseEvent,
-  selectedSeat: string[]
+  selected: {
+    data: SelectedFeatureProperties | null;
+    feature: string | null;
+    lastClickedFeature: string | null;
+    seats: string[];
+  }
 ) => {
   const { features } = event;
   const seatFeature = features?.find((f) => f.layer.id === "seats");
   const clickedSeatId = seatFeature?.properties?.id;
 
   if (clickedSeatId) {
-    if (selectedSeat.length >= 1) {
+    if (selected.seats.length >= 1) {
       // Si el asiento ya esta seleccionado, remover el asiento
-      if (selectedSeat.includes(clickedSeatId)) {
-        const removeSeat = selectedSeat.filter(
+      if (selected.seats.includes(clickedSeatId)) {
+        const removeSeat = selected.seats.filter(
           (seatId) => seatId !== clickedSeatId
         );
-        setSelectedSeat(removeSeat);
+        setSelected({ seats: removeSeat });
         return removeSeat;
       } else {
         // Si no pertenece al array de elegidos, agregar el asiento
-        const addNewSeat = [...selectedSeat, clickedSeatId];
-        setSelectedSeat(addNewSeat);
+        const addNewSeat = [...selected.seats, clickedSeatId];
+        setSelected({ seats: addNewSeat });
         return addNewSeat;
       }
     } else {
       const addSeat = [clickedSeatId];
-      setSelectedSeat(addSeat);
+      setSelected({ seats: addSeat });
       return addSeat;
     }
   }
@@ -198,5 +235,5 @@ export const handleSeatHover = (event: MapLayerMouseEvent) => {
   } else {
     setPopupInfo(null);
   }
-  setHoveredSeat(hoveredSeatId || null);
+  setHovered({ seat: hoveredSeatId || null });
 };
