@@ -22,7 +22,7 @@ import { SymbolLayerSpecification } from "maplibre-gl";
 interface LayersProps {
   allData: StadiumGeoJson | null;
   filteredSeatData: any[];
-  seatSize: number;
+  seatSize: number | null;
 }
 
 const Layers: React.FC<LayersProps> = ({
@@ -101,7 +101,7 @@ const Layers: React.FC<LayersProps> = ({
     type: "symbol",
     source: "data",
     layout: {
-      "text-field": ["get", "codigo"],
+      "text-field": ["get", "desc"],
       "text-size": 10,
       "text-anchor": "center",
       "text-padding": 10,

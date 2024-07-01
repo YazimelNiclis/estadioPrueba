@@ -17,6 +17,15 @@ import Layers from "./MapLayers";
 import { centroid } from "@turf/turf";
 import mapStyle from "../../../public/mapStyle.json";
 import SeatPricePopup from "./SeatPricePopup";
+import {
+  onHover,
+  handleMapRotation,
+  handleSectorClick,
+  handleSeatClick,
+  handleSeatHover,
+  handleZoom,
+  resetMap,
+} from "./mapHandlers";
 
 /* 
   Mapa. Componente a cargo de renderizar el mapa y manejo de interacciones con el mismo.
@@ -26,23 +35,15 @@ function MapView() {
   const {
     allData,
     selectedData,
-    setSelectedData,
     hoveredData,
-    setHoveredData,
     hoveredFeature,
-    setHoveredFeature,
     selectedFeature,
-    setSelectedFeature,
     lastClickedFeature,
-    setLastClickedFeature,
     initialView,
     setInitialView,
     seatData,
     filteredSeatData,
-    setFilteredSeatData,
-    setHoveredSeat,
     selectedSeat,
-    setSelectedSeat,
     zoom,
     setZoom,
     isMediumOrLarger,
@@ -54,169 +55,6 @@ function MapView() {
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
-
-  const onHover = React.useCallback(
-    (event: MapLayerMouseEvent) => {
-      const { features } = event;
-      const hoveredFeatureId = features && features[0]?.properties?.id;
-
-      if (hoveredFeatureId == hoveredFeature) {
-        return;
-      }
-      if (selectedFeature && hoveredFeatureId === selectedFeature) {
-        setHoveredFeature(null);
-      } else {
-        setHoveredFeature(hoveredFeatureId || null);
-      }
-
-      const { lngLat } = event;
-      const newData: Partial<HoverData> = {
-        ...hoveredData,
-        lat: lngLat.lat.toFixed(4),
-        lng: lngLat.lng.toFixed(4),
-        sector: features![0]?.properties?.nombre || "Ninguno",
-      };
-      setHoveredData(() => newData);
-    },
-    [hoveredData, hoveredFeature, selectedFeature]
-  );
-
-  const handleZoom = (e: ViewStateChangeEvent) => {
-    setHoveredData((prev) => ({
-      ...prev,
-      zoom: e.viewState.zoom.toFixed(4),
-    }));
-  };
-
-  const handleMapRotation = (
-    lngLat: maplibregl.LngLat,
-    clickedFeatureId: string | null
-  ) => {
-    if (clickedFeatureId && clickedFeatureId !== lastClickedFeature) {
-      const angle = calculateAngle(lngLat, centralPoint);
-      mapRef.current?.rotateTo(angle, {
-        duration: 1000,
-        // @ts-ignore
-        center: [lngLat.lng, lngLat.lat],
-        zoom: 20.5,
-        pitch: 60,
-      });
-    }
-  };
-
-  const resetMap = () => {
-    if (initialView) {
-      mapRef.current?.easeTo({
-        duration: 1000,
-        center: initialView.center,
-        zoom: initialView.zoom,
-        pitch: initialView.pitch,
-        bearing: initialView.bearing,
-      });
-    }
-  };
-
-  // Handler click de sectores
-  const onClick = React.useCallback(
-    (event: MapLayerMouseEvent) => {
-      const { features, lngLat } = event;
-
-      // Chequear si el click sucedio en la capa de asientos
-      const layer = features?.find((f) => f.layer.id === "seats");
-      if (layer) return;
-
-      const clickedFeatureId = features && features[0]?.properties?.id;
-      const clickedFeatureCodigo = features && features[0]?.properties?.codigo;
-
-      // Chequear si el mismo sector fue clickeado otra vez
-      if (clickedFeatureId === selectedFeature) {
-        return;
-      }
-
-      if (features?.length) {
-        // Actualizar estado de sector seleccionado
-        setSelectedFeature(clickedFeatureId);
-        setLastClickedFeature(clickedFeatureId);
-
-        handleMapRotation(lngLat, clickedFeatureId);
-        //    // setSelectedData(feature);
-
-        setSelectedSeat([]);
-
-        setHoveredFeature(null);
-        // Filtrar el geoJSON de asientos para extraer solo los que correspondan al sector
-        if (clickedFeatureCodigo) {
-          const filteredSeats = seatData.filter(
-            (seat) => seat.properties.sector_cod === clickedFeatureCodigo
-          );
-          setFilteredSeatData(filteredSeats);
-        }
-      } else {
-        setLastClickedFeature(null);
-        setSelectedFeature(null);
-        resetMap();
-        setSelectedData(null);
-        setFilteredSeatData([]);
-        setHoveredFeature(null);
-        setSelectedSeat([""]);
-      }
-    },
-    [lastClickedFeature, selectedFeature]
-  );
-
-  const handleSeatClick = React.useCallback(
-    (event: MapLayerMouseEvent) => {
-      const { features } = event;
-      const seatFeature = features?.find((f) => f.layer.id === "seats");
-      const clickedSeatId = seatFeature?.properties?.id;
-
-      if (clickedSeatId) {
-        if (selectedSeat.length >= 1) {
-          // Si el asiento ya esta seleccionado, remover el asiento
-          if (selectedSeat.includes(clickedSeatId)) {
-            const removeSeat = selectedSeat.filter(
-              (seatId) => seatId !== clickedSeatId
-            );
-            setSelectedSeat(removeSeat);
-            return removeSeat;
-          } else {
-            // Si no pertenece al array de elegidos, agregar el asiento
-            const addNewSeat = [...selectedSeat, clickedSeatId];
-            setSelectedSeat(addNewSeat);
-            return addNewSeat;
-          }
-        } else {
-          const addSeat = [clickedSeatId];
-          setSelectedSeat(addSeat);
-          return addSeat;
-        }
-      }
-    },
-    [selectedSeat, setSelectedSeat]
-  );
-
-  const handleSeatHover = React.useCallback(
-    (event: MapLayerMouseEvent) => {
-      const { features, lngLat } = event;
-      const seatFeature = features?.find((f) => f.layer.id === "seats");
-      const hoveredSeatId = seatFeature?.properties?.id;
-      const hoveredSeatNumber = seatFeature?.properties?.seat;
-      const hoveredSeatRow = seatFeature?.properties?.row;
-
-      if (hoveredSeatId && lngLat) {
-        setPopupInfo({
-          seatId: hoveredSeatNumber as string,
-          seatRow: hoveredSeatRow as string,
-          seatPrice: undefined,
-          lngLat: [lngLat.lng, lngLat.lat],
-        });
-      } else {
-        setPopupInfo(null);
-      }
-      setHoveredSeat(hoveredSeatId || null);
-    },
-    [setHoveredSeat]
-  );
 
   React.useEffect(() => {
     // Chequear screen size
@@ -261,14 +99,19 @@ function MapView() {
           centroidCoordinates[0],
           centroidCoordinates[1]
         );
-        handleMapRotation(lngLat, selectedFeature.id.toString());
+        handleMapRotation(
+          mapRef,
+          lngLat,
+          selectedFeature.id.toString(),
+          lastClickedFeature
+        );
       }
     };
 
     if (selectedData) {
       zoomToFeature(selectedData.featureProperties);
     } else {
-      resetMap();
+      resetMap(mapRef, initialView, zoom);
     }
   }, [selectedData]);
 
@@ -295,13 +138,21 @@ function MapView() {
         interactiveLayerIds={["data", "seats"]}
         onMouseMove={(e) => {
           if (!selectedFeature) {
-            onHover(e);
+            onHover(e, hoveredFeature, selectedFeature, hoveredData);
           }
           handleSeatHover(e);
         }}
         onClick={(e) => {
-          onClick(e);
-          handleSeatClick(e);
+          handleSectorClick(
+            e,
+            selectedFeature,
+            lastClickedFeature,
+            seatData,
+            mapRef,
+            initialView,
+            zoom
+          );
+          handleSeatClick(e, selectedSeat);
         }}
       >
         <Layers

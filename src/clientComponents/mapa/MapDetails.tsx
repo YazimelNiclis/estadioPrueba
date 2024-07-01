@@ -27,6 +27,7 @@ const MapDetails: React.FC = () => {
     setSelectedData(null);
   };
 
+  // mock data
   const subtotalItems = useMemo(
     () => [
       {
