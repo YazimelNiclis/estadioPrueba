@@ -98,3 +98,10 @@ export const getSeatSize = ({
 export const generateRandomInteger = (max: number): number => {
   return Math.floor(Math.random() * max);
 };
+
+
+export const currencyFormatter = new Intl.NumberFormat("es", {
+  style: "currency",
+  currency: "PYG",
+});
+

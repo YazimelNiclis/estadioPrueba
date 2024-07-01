@@ -2,9 +2,10 @@ import { create } from "zustand";
 import {
   Seat,
   HoverData,
-  SelectedData,
   StadiumGeoJson,
+  FeatureProperties,
   popup,
+  SelectedFeatureProperties,
 } from "@/utils/types/mapTypes";
 
 /* 
@@ -24,7 +25,7 @@ interface MapStore {
     size: number;
   };
   selected: {
-    data: SelectedData | undefined;
+    data: SelectedFeatureProperties | null;
     feature: string | null;
     lastClickedFeature: string | null;
     seats: string[];
@@ -56,7 +57,7 @@ const useMapStore = create<MapStore>((set) => ({
     size: 0,
   },
   selected: {
-    data: undefined,
+    data: null,
     feature: null,
     lastClickedFeature: null,
     seats: [""],

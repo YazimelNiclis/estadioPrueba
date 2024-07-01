@@ -1,9 +1,18 @@
-import { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
+import {
+  MapLayerMouseEvent,
+  MapRef,
+  ViewStateChangeEvent,
+} from "react-map-gl/maplibre";
 import { LngLat } from "maplibre-gl";
 import { calculateAngle } from "@/utils/utils";
-import { HoverData, Seat, SelectedData } from "@/utils/types/mapTypes";
+import {
+  HoverData,
+  Seat,
+  SelectedFeatureProperties,
+} from "@/utils/types/mapTypes";
 import { centralPoint } from "@/constants/mapConstants";
 import useMapStore from "@/app/store/mapStore";
+import { feature } from "@turf/turf";
 
 const { setSelected, setHovered, setSeatData, setPopupInfo } =
   useMapStore.getState();
@@ -44,13 +53,11 @@ export const onHover = (
   };
   setHovered({ data: newData });
 };
-
-export const handleZoom = (e) => {
-  setHovered((prev) => ({
-    data: {
-      ...prev.data,
-      zoom: e.viewState.zoom.toFixed(4),
-    },
+//TODO:Arreglar con estados nuevos
+export const handleZoom = (e: ViewStateChangeEvent) => {
+  setHoveredData((prev) => ({
+    ...prev,
+    zoom: e.viewState.zoom.toFixed(4),
   }));
 };
 
@@ -144,7 +151,6 @@ export const handleSectorClick = (
   }
 
   if (features?.length) {
-    const feature = features[0]?.properties as SelectedData;
     // Actualizar estado de sector seleccionado
     setSelected({
       feature: clickedFeatureId,

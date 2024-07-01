@@ -43,13 +43,6 @@ export interface HoverData {
   zoom?: string;
   sector: string;
 }
-export interface SelectedData {
-  codigo: number;
-  desc: string;
-  id: number;
-  nombre: string;
-  place_id: number;
-}
 
 //Estadio geoJSON
 export type MultiPolygon = {
@@ -78,4 +71,10 @@ export interface StadiumGeoJson {
     };
   };
   features: Feature[];
+}
+
+export interface SelectedFeatureProperties {
+  price: number;
+  availableTickets: number;
+  featureProperties: FeatureProperties;
 }
