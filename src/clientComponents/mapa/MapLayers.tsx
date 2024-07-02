@@ -48,7 +48,7 @@ const Layers: React.FC<LayersProps> = ({ allData }) => {
       type: "circle",
       source: "seats",
       paint: {
-        "circle-radius": 5, //seatData.size,
+        "circle-radius": seatData.size,
         "circle-color": [
           "case",
           ["==", ["get", "id"], hovered.seat || ""],
@@ -72,7 +72,7 @@ const Layers: React.FC<LayersProps> = ({ allData }) => {
     source: "seats",
     layout: {
       "text-field": ["get", "seat"],
-      "text-size": 5, //seatData.size,
+      "text-size": seatData.size,
       "text-anchor": "center",
       "text-allow-overlap": true,
     },

@@ -18,6 +18,7 @@ import {
 
 interface MapStore {
   allData: StadiumGeoJson | null;
+  hoveredData: HoverData;
   seatData: {
     allSeats: Seat[];
     filtered: any[];
@@ -30,7 +31,6 @@ interface MapStore {
     seats: string[];
   };
   hovered: {
-    data: HoverData;
     feature: string | null;
     seat: string | null;
   };
@@ -41,6 +41,7 @@ interface MapStore {
   };
   popupInfo: popup | null;
   setAllData: (data: StadiumGeoJson) => void;
+  setHoveredData: (update: (prev: HoverData) => Partial<HoverData>) => void;
   setSeatData: (update: Partial<MapStore["seatData"]>) => void;
   setSelected: (selected: Partial<MapStore["selected"]>) => void;
   setHovered: (hovered: Partial<MapStore["hovered"]>) => void;
@@ -50,6 +51,12 @@ interface MapStore {
 
 const useMapStore = create<MapStore>((set) => ({
   allData: null,
+  hoveredData: {
+    lat: "",
+    lng: "",
+    sector: "Ninguno",
+    zoom: "",
+  },
   seatData: {
     allSeats: [],
     filtered: [],
@@ -62,12 +69,6 @@ const useMapStore = create<MapStore>((set) => ({
     seats: [""],
   },
   hovered: {
-    data: {
-      lat: "",
-      lng: "",
-      sector: "Ninguno",
-      zoom: "",
-    },
     feature: null,
     seat: null,
   },
@@ -78,6 +79,13 @@ const useMapStore = create<MapStore>((set) => ({
   },
   popupInfo: null,
   setAllData: (data) => set({ allData: data }),
+  setHoveredData: (update) =>
+    set((state) => ({
+      hoveredData: {
+        ...state.hoveredData,
+        ...update(state.hoveredData),
+      },
+    })),
   setSeatData: (update) =>
     set((state) => ({
       seatData: { ...state.seatData, ...update },

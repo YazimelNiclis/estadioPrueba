@@ -16,14 +16,14 @@ import { centralPoint } from "@/constants/mapConstants";
 import useMapStore from "@/app/store/mapStore";
 import { centroid } from "@turf/turf";
 
-const { setSelected, setHovered, setSeatData, setPopupInfo } =
+const { setSelected, setHovered, setSeatData, setPopupInfo, setHoveredData } =
   useMapStore.getState();
 
 // Handler hover sectores
 export const onHover = (
   event: MapLayerMouseEvent,
+  hoveredData: HoverData,
   hovered: {
-    data: HoverData;
     feature: string | null;
     seat: string | null;
   },
@@ -47,22 +47,19 @@ export const onHover = (
   }
 
   const { lngLat } = event;
-  const newData: HoverData = {
-    ...hovered.data,
+  const newData: Partial<HoverData> = {
+    ...hoveredData,
     lat: lngLat.lat.toFixed(4),
     lng: lngLat.lng.toFixed(4),
     sector: features![0]?.properties?.nombre || "Ninguno",
   };
-  setHovered({ data: newData });
+  setHoveredData(() => newData);
 };
 
-//TODO:Arreglar
 export const handleZoom = (e: ViewStateChangeEvent) => {
-  setHovered((prev) => ({
-    data: {
-      ...prev.data,
-      zoom: e.viewState.zoom.toFixed(4),
-    },
+  setHoveredData((prev) => ({
+    ...prev,
+    zoom: e.viewState.zoom.toFixed(4),
   }));
 };
 

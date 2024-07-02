@@ -31,6 +31,7 @@ import {
 function MapView() {
   const {
     allData,
+    hoveredData,
     selected,
     hovered,
     mapView,
@@ -42,25 +43,6 @@ function MapView() {
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
-
-  /*  const zoomToFeature = (selectedFeature: FeatureProperties) => {
-    const feature = allData?.features.find(
-      (f) => f.properties.id === selectedFeature.id
-    );
-    if (feature) {
-      const centroidCoordinates = centroid(feature).geometry.coordinates;
-      const lngLat = new LngLat(
-        centroidCoordinates[0],
-        centroidCoordinates[1]
-      );
-      handleMapRotation(
-        mapRef,
-        lngLat,
-        selectedFeature.id.toString(),
-        selected
-      );
-    }
-  }; */
 
   React.useEffect(() => {
     // Chequear screen size
@@ -105,9 +87,9 @@ function MapView() {
   }, [selected.data, selected]);
 
   React.useEffect(() => {
-    const newSeatSize = getSeatSize({ currentZoom: Number(hovered.data.zoom) });
+    const newSeatSize = getSeatSize({ currentZoom: Number(hoveredData.zoom) });
     setSeatData({ size: newSeatSize });
-  }, [hovered.data.zoom]);
+  }, [hoveredData.zoom]);
 
   return (
     <div className="w-full md:col-span-3 h-full overflow-auto bg-slate-200 shadow-inner border-r-2 border-r-slate-300">
@@ -127,7 +109,7 @@ function MapView() {
         interactiveLayerIds={["data", "seats"]}
         onMouseMove={(e) => {
           if (!selected.feature) {
-            onHover(e, hovered, selected);
+            onHover(e, hoveredData, hovered, selected);
           }
           handleSeatHover(e);
         }}
