@@ -6,12 +6,15 @@ import {
 import { LngLat } from "maplibre-gl";
 import { calculateAngle } from "@/utils/utils";
 import {
+  FeatureProperties,
   HoverData,
   Seat,
   SelectedFeatureProperties,
+  StadiumGeoJson,
 } from "@/utils/types/mapTypes";
 import { centralPoint } from "@/constants/mapConstants";
 import useMapStore from "@/app/store/mapStore";
+import { centroid } from "@turf/turf";
 
 const { setSelected, setHovered, setSeatData, setPopupInfo } =
   useMapStore.getState();
@@ -61,6 +64,27 @@ export const handleZoom = (e: ViewStateChangeEvent) => {
       zoom: e.viewState.zoom.toFixed(4),
     },
   }));
+};
+
+export const zoomToFeature = (
+  selectedFeature: FeatureProperties,
+  allData: StadiumGeoJson | null,
+  mapRef: React.RefObject<MapRef>,
+  selected: {
+    data: SelectedFeatureProperties | null;
+    feature: string | null;
+    lastClickedFeature: string | null;
+    seats: string[];
+  }
+) => {
+  const feature = allData?.features.find(
+    (f) => f.properties.id === selectedFeature.id
+  );
+  if (feature) {
+    const centroidCoordinates = centroid(feature).geometry.coordinates;
+    const lngLat = new LngLat(centroidCoordinates[0], centroidCoordinates[1]);
+    handleMapRotation(mapRef, lngLat, selectedFeature.id.toString(), selected);
+  }
 };
 
 export const handleMapRotation = (

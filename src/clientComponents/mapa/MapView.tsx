@@ -21,6 +21,7 @@ import {
   handleSeatHover,
   handleZoom,
   resetMap,
+  zoomToFeature,
 } from "./mapHandlers";
 
 /* 
@@ -41,6 +42,25 @@ function MapView() {
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
+
+  /*  const zoomToFeature = (selectedFeature: FeatureProperties) => {
+    const feature = allData?.features.find(
+      (f) => f.properties.id === selectedFeature.id
+    );
+    if (feature) {
+      const centroidCoordinates = centroid(feature).geometry.coordinates;
+      const lngLat = new LngLat(
+        centroidCoordinates[0],
+        centroidCoordinates[1]
+      );
+      handleMapRotation(
+        mapRef,
+        lngLat,
+        selectedFeature.id.toString(),
+        selected
+      );
+    }
+  }; */
 
   React.useEffect(() => {
     // Chequear screen size
@@ -77,27 +97,8 @@ function MapView() {
   }, [mapRef.current]);
 
   React.useEffect(() => {
-    const zoomToFeature = (selectedFeature: FeatureProperties) => {
-      const feature = allData?.features.find(
-        (f) => f.properties.id === selectedFeature.id
-      );
-      if (feature) {
-        const centroidCoordinates = centroid(feature).geometry.coordinates;
-        const lngLat = new LngLat(
-          centroidCoordinates[0],
-          centroidCoordinates[1]
-        );
-        handleMapRotation(
-          mapRef,
-          lngLat,
-          selectedFeature.id.toString(),
-          selected
-        );
-      }
-    };
-
     if (selected.data) {
-      zoomToFeature(selected.data.featureProperties);
+      zoomToFeature(selected.data.featureProperties, allData, mapRef, selected);
     } /* else {
       resetMap(mapRef, mapView);
     } */
