@@ -3,7 +3,6 @@ import {
   Seat,
   HoverData,
   StadiumGeoJson,
-  FeatureProperties,
   popup,
   SelectedFeatureProperties,
 } from "@/utils/types/mapTypes";

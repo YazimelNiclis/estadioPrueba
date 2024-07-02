@@ -12,7 +12,6 @@ import {
 } from "@/utils/types/mapTypes";
 import { centralPoint } from "@/constants/mapConstants";
 import useMapStore from "@/app/store/mapStore";
-import { feature } from "@turf/turf";
 
 const { setSelected, setHovered, setSeatData, setPopupInfo } =
   useMapStore.getState();
@@ -53,6 +52,7 @@ export const onHover = (
   };
   setHovered({ data: newData });
 };
+
 //TODO:Arreglar
 export const handleZoom = (e: ViewStateChangeEvent) => {
   setHovered((prev) => ({
@@ -68,7 +68,7 @@ export const handleMapRotation = (
   lngLat: LngLat,
   clickedFeatureId: string | null,
   selected: {
-    data: SelectedData | undefined;
+    data: SelectedFeatureProperties | null;
     feature: string | null;
     lastClickedFeature: string | null;
     seats: string[];
@@ -88,23 +88,26 @@ export const handleMapRotation = (
 
 export const resetMap = (
   mapRef: React.RefObject<MapRef>,
-  initialView: any,
-  zoom: number
+  mapView: {
+    initialView: any;
+    zoom: number;
+    isMediumOrLarger: boolean;
+  }
 ) => {
-  if (initialView) {
+  if (mapView.initialView) {
     mapRef.current?.easeTo({
       duration: 1000,
-      center: initialView.center,
-      zoom: initialView.zoom,
-      pitch: initialView.pitch,
-      bearing: initialView.bearing,
+      center: mapView.initialView.center,
+      zoom: mapView.initialView.zoom,
+      pitch: mapView.initialView.pitch,
+      bearing: mapView.initialView.bearing,
     });
   } else {
     // Temporal fix
     mapRef.current?.easeTo({
       duration: 1000,
       center: [-57.6573, -25.2921546],
-      zoom: zoom,
+      zoom: mapView.zoom,
     });
   }
 };
@@ -162,7 +165,6 @@ export const handleSectorClick = (
     handleMapRotation(mapRef, lngLat, clickedFeatureId, selected);
 
     setSelected({
-      //data: feature,
       seats: [],
     });
 
@@ -172,7 +174,7 @@ export const handleSectorClick = (
       lastClickedFeature: null,
       feature: null,
     });
-    resetMap(mapRef, mapView.initialView, mapView.zoom);
+    resetMap(mapRef, mapView);
     setSelected({
       data: undefined,
       seats: [""],

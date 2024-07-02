@@ -1,15 +1,9 @@
 "use client";
 
 import React from "react";
-import {
-  Source,
-  Layer,
-  FillLayer,
-  SymbolLayer,
-  CircleLayer,
-} from "react-map-gl/maplibre";
+import { Source, Layer, FillLayer, SymbolLayer } from "react-map-gl/maplibre";
 import useMapStore from "@/app/store/mapStore";
-import { HoverData, Seat, StadiumGeoJson } from "@/utils/types/mapTypes";
+import { StadiumGeoJson } from "@/utils/types/mapTypes";
 import { SymbolLayerSpecification } from "maplibre-gl";
 
 /* 

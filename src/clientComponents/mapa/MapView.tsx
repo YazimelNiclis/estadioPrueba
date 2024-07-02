@@ -3,13 +3,9 @@
 import * as React from "react";
 import Map from "react-map-gl/maplibre";
 import { LngLat, StyleSpecification } from "maplibre-gl";
-import type {
-  MapLayerMouseEvent,
-  MapRef,
-  ViewStateChangeEvent,
-} from "react-map-gl/maplibre";
-import { calculateAngle, getSeatSize } from "../../utils/utils";
-import { HoverData, FeatureProperties } from "@/utils/types/mapTypes";
+import type { MapRef } from "react-map-gl/maplibre";
+import { getSeatSize } from "../../utils/utils";
+import { FeatureProperties } from "@/utils/types/mapTypes";
 import useMapStore from "@/app/store/mapStore";
 import { centralPoint, bounds } from "@/constants/mapConstants";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -45,12 +41,6 @@ function MapView() {
   } = useMapStore();
 
   const mapRef = React.useRef<MapRef>(null);
-
-  React.useEffect(() => {
-    console.log(selected, "NEW SELECTED STATE!");
-    //console.log(hovered, "HOVERED NEW STATE!!!!!!!!!");
-    console.log(seatData.filtered, "SEAT FILTERED DATA DATA DATA!!!!!");
-  }, [selected, seatData.filtered]);
 
   React.useEffect(() => {
     // Chequear screen size
@@ -108,9 +98,9 @@ function MapView() {
 
     if (selected.data) {
       zoomToFeature(selected.data.featureProperties);
-    } else {
-      resetMap(mapRef, mapView.initialView, mapView.zoom);
-    }
+    } /* else {
+      resetMap(mapRef, mapView);
+    } */
   }, [selected.data, selected]);
 
   React.useEffect(() => {
