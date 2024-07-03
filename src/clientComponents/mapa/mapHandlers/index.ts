@@ -19,6 +19,7 @@ const {
   setSelectedSeat,
   setPopupInfo,
   setHoveredSeat,
+  setLastZoom
 } = useMapStore.getState();
 
 // Handler hover sectores
@@ -48,13 +49,6 @@ export const onHover = (
     sector: features![0]?.properties?.nombre || "Ninguno",
   };
   setHoveredData(() => newData);
-};
-
-export const handleZoom = (e: ViewStateChangeEvent) => {
-  setHoveredData((prev) => ({
-    ...prev,
-    zoom: e.viewState.zoom.toFixed(4),
-  }));
 };
 
 export const handleMapRotation = (
@@ -199,4 +193,31 @@ export const handleSeatHover = (event: MapLayerMouseEvent) => {
     setPopupInfo(null);
   }
   setHoveredSeat(hoveredSeatId || null);
+};
+
+export const handleZoom = (e: ViewStateChangeEvent,
+  mapRef: React.RefObject<MapRef>,
+  initialView: any,
+  zoom: number,
+  lastZoom: number,
+) => {
+
+  const map = mapRef.current?.getMap();
+  if (!map) return;
+
+  if(e.viewState.zoom <= lastZoom && e.viewState.zoom == 17.5){
+    setLastClickedFeature(null);
+    setSelectedFeature(null);
+    resetMap(mapRef, initialView, zoom);
+    setSelectedData(null);
+    setFilteredSeatData([]);
+    setHoveredFeature(null);
+    setSelectedSeat([""]);
+  }; 
+
+  setHoveredData((prev) => ({
+    ...prev,
+    zoom: e.viewState.zoom.toFixed(4),
+  }));
+  setLastZoom(e.viewState.zoom);
 };

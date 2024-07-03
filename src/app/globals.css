@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 .screen-h {
-  min-height: calc(100vh - 8rem);
+  min-height: calc(100vh - 7.5rem);
 }
 
 @media (max-width: 768px) {
   .screen-h {
-    min-height: calc(100vh - 8rem);
+    min-height: calc(100vh - 7.5rem);
     height: auto;
   }
 }
