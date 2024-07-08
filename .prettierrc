@@ -1,0 +1,13 @@
+{
+  "bracketSpacing": true,
+  "endOfLine": "auto",
+  "printWidth": 80,
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 4,
+  "trailingComma": "none",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "importOrder": ["^@/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}

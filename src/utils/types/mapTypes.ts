@@ -1,80 +1,80 @@
 //Asientos geoJSON
 export interface Seat {
-  type: string;
-  properties: {
-    id: number;
-    place_id: number;
-    sector_cod: string;
-    row: number;
-    seat: number;
-  };
-  geometry: {
     type: string;
-    coordinates: [number, number];
-  };
+    properties: {
+        id: number;
+        place_id: number;
+        sector_cod: string;
+        row: number;
+        seat: number;
+    };
+    geometry: {
+        type: string;
+        coordinates: [number, number];
+    };
 }
 
 export type Point = {
-  type: "Point";
-  coordinates: number[];
+    type: 'Point';
+    coordinates: number[];
 };
 export interface SeatsGeoJson {
-  type: "FeatureCollection";
-  name: string;
-  crs: {
-    type: "name";
-    properties: {
-      name: string;
+    type: 'FeatureCollection';
+    name: string;
+    crs: {
+        type: 'name';
+        properties: {
+            name: string;
+        };
     };
-  };
-  features: Seat[];
+    features: Seat[];
 }
 
 export interface popup {
-  seatId: string;
-  seatRow: string;
-  seatPrice: number | undefined;
-  lngLat: [number, number];
+    seatId: string;
+    seatRow: string;
+    seatPrice: number | undefined;
+    lngLat: [number, number];
 }
 //Sector
 export interface HoverData {
-  lng: string;
-  lat: string;
-  zoom?: string;
-  sector: string;
+    lng: string;
+    lat: string;
+    zoom?: string;
+    sector: string;
 }
 
 //Estadio geoJSON
 export type MultiPolygon = {
-  type: "MultiPolygon";
-  coordinates: number[][][][];
+    type: 'MultiPolygon';
+    coordinates: number[][][][];
 };
 export interface FeatureProperties {
-  id: number;
-  nombre: string;
-  place_id: number;
-  desc: string;
-  codigo: string;
+    id: number;
+    nombre: string;
+    place_id: number;
+    desc: string;
+    codigo: string;
 }
 export interface Feature {
-  type: "Feature";
-  properties: FeatureProperties;
-  geometry: MultiPolygon;
+    type: 'Feature';
+    properties: FeatureProperties;
+    geometry: MultiPolygon;
 }
 export interface StadiumGeoJson {
-  type: "FeatureCollection";
-  name: string;
-  crs: {
-    type: "name";
-    properties: {
-      name: string;
+    type: 'FeatureCollection';
+    name: string;
+    crs: {
+        type: 'name';
+        properties: {
+            name: string;
+        };
     };
-  };
-  features: Feature[];
+    features: Feature[];
 }
 
 export interface SelectedFeatureProperties {
-  price: number;
-  availableTickets: number;
-  featureProperties: FeatureProperties;
+    price: number;
+    availableTickets: number;
+    featureProperties: FeatureProperties;
 }
