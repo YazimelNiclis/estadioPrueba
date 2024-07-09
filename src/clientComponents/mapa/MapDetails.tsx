@@ -22,7 +22,7 @@ const MAX_TICKETS = 4;
 const MapDetails: React.FC = () => {
     const { count: ticketCount, decrement, increment } = useCounter(0);
     const { selectedData, setSelectedData, filteredSeatData } = useMapStore();
-
+    // const hola = "";
     const onBackButtonClick = () => {
         setSelectedData(null);
     };
