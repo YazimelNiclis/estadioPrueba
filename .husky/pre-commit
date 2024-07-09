@@ -3,7 +3,7 @@
 branch="$(git rev-parse --abbrev-ref HEAD)"
 
 if [ "$branch" = "main" ] || [ "$branch" = "dev" ]; then
-  echo -e "🫵 No puedes realizar un commit directo a la rama $branch"
+  echo -e "👮🚨🚔🚔🚔🚓🚓🚨 No puedes realizar un commit directo a la rama \"$branch\""
   exit 1
 fi
 
