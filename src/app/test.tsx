@@ -72,6 +72,7 @@ const Button: React.FC<ButtonProps> = ({
       {...ariaProps}
     >
       {children}
+      hola
     </NextUIButton>
   );
 };
