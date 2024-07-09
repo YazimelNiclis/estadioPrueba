@@ -1,15 +1,13 @@
 import Link from 'next/link';
 
 export default function Home() {
-    return (
-        <>
-            <main className="flex h-screen w-full items-center justify-center">
-                <Link href="/estadio">
-                    <h1 className="underline hover:text-gray-400">
-                        Go to estadio
-                    </h1>
-                </Link>
-            </main>
-        </>
-    );
+  return (
+    <>
+      <main className="flex h-screen w-full items-center justify-center">
+        <Link href="/estadio">
+          <h1 className="underline hover:text-gray-400">Go to estadio</h1>
+        </Link>
+      </main>
+    </>
+  );
 }

@@ -9,5 +9,4 @@ fi
 
 . "$(dirname "$0")/_/husky.sh"
 
-# for potential testing
 npx lint-staged

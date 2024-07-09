@@ -1,68 +1,62 @@
-import React from 'react';
 import { Divider } from '@nextui-org/react';
-import { FeatureProperties } from '@/utils/types/mapTypes';
+import React from 'react';
 import useMapStore from '@/app/store/mapStore';
+import { FeatureProperties } from '@/utils/types/mapTypes';
 import { currencyFormatter } from '@/utils/utils';
 
 interface SectorInfoProps {
-    properties: FeatureProperties;
-    availableTickets: number;
-    price: number;
+  properties: FeatureProperties;
+  availableTickets: number;
+  price: number;
 }
 
 const SectorInfo: React.FC<SectorInfoProps> = ({
-    properties,
-    availableTickets,
-    price
+  properties,
+  availableTickets,
+  price
 }) => {
-    const { setSelectedData } = useMapStore();
+  const { setSelectedData } = useMapStore();
 
-    const onClick = () => {
-        if (isSoldOut) return;
+  const onClick = () => {
+    if (isSoldOut) return;
 
-        const selectedFeatureProperties = {
-            price,
-            availableTickets,
-            featureProperties: properties
-        };
-
-        setSelectedData(selectedFeatureProperties);
+    const selectedFeatureProperties = {
+      price,
+      availableTickets,
+      featureProperties: properties
     };
 
-    const isSoldOut = availableTickets === 0;
+    setSelectedData(selectedFeatureProperties);
+  };
 
-    return (
-        <>
-            <div
-                className={`mt-1 flex justify-between gap-2 text-balance p-4 ${
-                    isSoldOut
-                        ? 'opacity-30'
-                        : 'hover:cursor-pointer hover:bg-slate-50'
-                }`}
-                onClick={onClick}
-            >
-                <div className="flex flex-col justify-center gap-1 text-left">
-                    <h2 className="text-lg font-semibold">
-                        {properties.nombre}
-                    </h2>
-                    <span className="text-sm text-[#495F76]">
-                        {isSoldOut
-                            ? 'Agotado'
-                            : `Queda${availableTickets > 1 ? 'n' : ''} ${availableTickets}`}
-                    </span>
-                </div>
-                <div className="flex flex-col justify-center gap-1 text-right">
-                    <h2 className="text-lg font-semibold">
-                        {currencyFormatter.format(price)}
-                    </h2>
-                    <span className="text-sm text-[#495F76]">
-                        Precio por persona
-                    </span>
-                </div>
-            </div>
-            <Divider />
-        </>
-    );
+  const isSoldOut = availableTickets === 0;
+
+  return (
+    <>
+      <div
+        className={`mt-1 flex justify-between gap-2 text-balance p-4 ${
+          isSoldOut ? 'opacity-30' : 'hover:cursor-pointer hover:bg-slate-50'
+        }`}
+        onClick={onClick}
+      >
+        <div className="flex flex-col justify-center gap-1 text-left">
+          <h2 className="text-lg font-semibold">{properties.nombre}</h2>
+          <span className="text-sm text-[#495F76]">
+            {isSoldOut ?
+              'Agotado'
+            : `Queda${availableTickets > 1 ? 'n' : ''} ${availableTickets}`}
+          </span>
+        </div>
+        <div className="flex flex-col justify-center gap-1 text-right">
+          <h2 className="text-lg font-semibold">
+            {currencyFormatter.format(price)}
+          </h2>
+          <span className="text-sm text-[#495F76]">Precio por persona</span>
+        </div>
+      </div>
+      <Divider />
+    </>
+  );
 };
 
 export default SectorInfo;

@@ -1,36 +1,33 @@
 import { range } from 'd3-array';
 import { scaleQuantile } from 'd3-scale';
-
 import type GeoJSON from 'geojson';
 
 export function updatePercentiles(
-    featureCollection: GeoJSON.FeatureCollection<GeoJSON.Geometry>,
-    accessor: (f: GeoJSON.Feature<GeoJSON.Geometry>) => number
+  featureCollection: GeoJSON.FeatureCollection<GeoJSON.Geometry>,
+  accessor: (f: GeoJSON.Feature<GeoJSON.Geometry>) => number
 ): GeoJSON.FeatureCollection<GeoJSON.Geometry> {
-    const { features } = featureCollection;
-    const scale = scaleQuantile()
-        .domain(features.map(accessor))
-        .range(range(9));
-    return {
-        type: 'FeatureCollection',
-        features: features.map((f) => {
-            const value = accessor(f);
-            const properties = {
-                ...f.properties,
-                value,
-                percentile: scale(value)
-            };
-            return { ...f, properties };
-        })
-    };
+  const { features } = featureCollection;
+  const scale = scaleQuantile().domain(features.map(accessor)).range(range(9));
+  return {
+    type: 'FeatureCollection',
+    features: features.map(f => {
+      const value = accessor(f);
+      const properties = {
+        ...f.properties,
+        value,
+        percentile: scale(value)
+      };
+      return { ...f, properties };
+    })
+  };
 }
 
 /**
  * Interface for geographical coordinates.
  */
 interface Coordinates {
-    lng: number;
-    lat: number;
+  lng: number;
+  lat: number;
 }
 
 /**
@@ -42,38 +39,38 @@ interface Coordinates {
  * @returns The angle in degrees from 0 to 360.
  */
 export const calculateAngle = (
-    point1: Coordinates,
-    point2: Coordinates
+  point1: Coordinates,
+  point2: Coordinates
 ): number => {
-    const { lng: lng1, lat: lat1 } = point1;
-    const { lng: lng2, lat: lat2 } = point2;
+  const { lng: lng1, lat: lat1 } = point1;
+  const { lng: lng2, lat: lat2 } = point2;
 
-    // Calculate the differences in coordinates
-    const deltaLng = lng2 - lng1;
+  // Calculate the differences in coordinates
+  const deltaLng = lng2 - lng1;
 
-    // Calculate the y component of the angle
-    const y = Math.sin(deltaLng) * Math.cos(lat2);
+  // Calculate the y component of the angle
+  const y = Math.sin(deltaLng) * Math.cos(lat2);
 
-    // Calculate the x component of the angle
-    const x =
-        Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
+  // Calculate the x component of the angle
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
 
-    // Calculate the angle in radians and convert it to degrees
-    const angle = Math.atan2(y, x) * (180 / Math.PI);
+  // Calculate the angle in radians and convert it to degrees
+  const angle = Math.atan2(y, x) * (180 / Math.PI);
 
-    return (angle + 360) % 360;
+  return (angle + 360) % 360;
 };
 
 /**
  * Interface for the parameters of the getSeatSize function.
  */
 interface SeatSizeParams {
-    currentZoom: number;
-    minZoom?: number;
-    maxZoom?: number;
-    minSize?: number;
-    maxSize?: number;
+  currentZoom: number;
+  minZoom?: number;
+  maxZoom?: number;
+  minSize?: number;
+  maxSize?: number;
 }
 
 /**
@@ -83,26 +80,26 @@ interface SeatSizeParams {
  * @returns {number} The calculated seat size.
  */
 export const getSeatSize = ({
-    currentZoom,
-    minZoom = 20,
-    maxZoom = 22,
-    minSize = 3,
-    maxSize = 9
+  currentZoom,
+  minZoom = 20,
+  maxZoom = 22,
+  minSize = 3,
+  maxSize = 9
 }: SeatSizeParams): number => {
-    if (currentZoom < minZoom) return 0; //minSize;
-    if (currentZoom > maxZoom) return maxSize;
+  if (currentZoom < minZoom) return 0; //minSize;
+  if (currentZoom > maxZoom) return maxSize;
 
-    const interpolatedSize =
-        minSize +
-        ((currentZoom - minZoom) / (maxZoom - minZoom)) * (maxSize - minSize);
-    return interpolatedSize;
+  const interpolatedSize =
+    minSize +
+    ((currentZoom - minZoom) / (maxZoom - minZoom)) * (maxSize - minSize);
+  return interpolatedSize;
 };
 
 export const generateRandomInteger = (max: number): number => {
-    return Math.floor(Math.random() * max);
+  return Math.floor(Math.random() * max);
 };
 
 export const currencyFormatter = new Intl.NumberFormat('es', {
-    style: 'currency',
-    currency: 'PYG'
+  style: 'currency',
+  currency: 'PYG'
 });
