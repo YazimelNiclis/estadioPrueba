@@ -1,6 +1,7 @@
 {
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
+  "editor.formatOnSaveMode": "file",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
